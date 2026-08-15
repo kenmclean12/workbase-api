@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Identity;
 using newproj.DTO.User;
 
@@ -32,18 +31,13 @@ public class User
 
     private static readonly PasswordHasher<User> _passwordHasher = new();
 
-    public static User Create(UserCreateDTO dto)
+    public User(UserCreateDTO dto)
     {
-        var user = new User
-        {
-            FirstName = dto.FirstName,
-            LastName = dto.LastName,
-            Email = dto.Email,
-            Role = dto.Role,
-        };
-
-        user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
-        return user;
+        FirstName = dto.FirstName;
+        LastName = dto.LastName;
+        Email = dto.Email;
+        Role = dto.Role;
+        PasswordHash = _passwordHasher.HashPassword(this, dto.Password);
     }
 
     public void Update(UserUpdateDTO dto)
