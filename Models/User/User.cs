@@ -42,9 +42,11 @@ public class User
 
     public void Update(UserUpdateDTO dto)
     {
+        //Null Comparisons
         if (dto.FirstName != null) FirstName = dto.FirstName;
         if (dto.LastName != null) LastName = dto.LastName;
         if (dto.Email != null) Email = dto.Email;
-        if (dto.Role != null) Role = (UserRole)dto.Role;
+        //Pattern Matching w/ Variable Declaration
+        if (dto.Role is UserRole role) Role = role;
     }
 }
