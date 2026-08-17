@@ -31,13 +31,18 @@ public class User
 
     private static readonly PasswordHasher<User> _passwordHasher = new();
 
-    public User(UserCreateDTO dto)
+    public static User Create(UserCreateDTO dto)
     {
-        FirstName = dto.FirstName;
-        LastName = dto.LastName;
-        Email = dto.Email;
-        Role = dto.Role;
-        PasswordHash = _passwordHasher.HashPassword(this, dto.Password);
+        User user = new()
+        {
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
+            Email = dto.Email,
+            Role = dto.Role,
+        };
+
+        user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
+        return user;
     }
 
     public void Update(UserUpdateDTO dto)
