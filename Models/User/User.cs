@@ -11,20 +11,20 @@ public class User
 
     [Required]
     [MaxLength(25)]
-    public string FirstName { get; set; } = "";
+    public string FirstName { get; set; } = string.Empty;
 
     [Required]
     [MaxLength(25)]
-    public string LastName { get; set; } = "";
+    public string LastName { get; set; } = string.Empty;
 
     [Required]
     [EmailAddress]
     [MaxLength(50)]
-    public string Email { get; set; } = "";
+    public string Email { get; set; } = string.Empty;
 
     [Required]
     [MaxLength(50)]
-    public string PasswordHash { get; set; } = "";
+    public string PasswordHash { get; set; } = string.Empty;
 
     public UserRole Role { get; set; } = UserRole.READONLY;
 
