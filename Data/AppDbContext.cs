@@ -17,4 +17,5 @@ public class AppDbContext : DbContext
 
     public DbSet<Request> Requests { get; set; }
 
+    public DbSet<RequestNote> RequestNotes { get; set; }
 }
