@@ -9,7 +9,18 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalHost", policy =>
+    {
+        policy.WithOrigins("https://localhost:5173", "http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+app.UseCors("AllowLocalHost");
 
 using (var scope = app.Services.CreateScope())
 {
