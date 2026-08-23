@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using newproj.DTO.User;
+using Npgsql.Replication;
 
 namespace newproj.Models.User;
 
@@ -51,5 +52,18 @@ public class User
         if (dto.LastName != null) LastName = dto.LastName;
         if (dto.Email != null) Email = dto.Email;
         if (dto.Role is UserRole role) Role = role;
+    }
+
+    public UserResponseDto ToResponse()
+    {
+        return new UserResponseDto
+        {
+            Id = this.Id,
+            FirstName = this.FirstName,
+            LastName = this.LastName,
+            Email = this.Email,
+            Role = this.Role,
+            CreatedAt = this.CreatedAt,
+        };
     }
 }
