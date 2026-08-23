@@ -9,7 +9,7 @@ public static class RequestService
 {
     public static void MapRequestEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("/request");
+        RouteGroupBuilder group = app.MapGroup("/request");
 
         group.MapGet("/", async (AppDbContext db) =>
         {

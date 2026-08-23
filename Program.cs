@@ -39,4 +39,6 @@ app.MapAddressEndpoints();
 app.MapClientEndpoints();
 app.MapRequestEndpoints();
 app.MapRequestNoteEndpoints();
+app.MapRequestHistoryEndpoints();
+//Messages
 app.Run();

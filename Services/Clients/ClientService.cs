@@ -9,7 +9,7 @@ public static class ClientService
 {
   public static void MapClientEndpoints(this WebApplication app)
   {
-    var group = app.MapGroup("/client");
+    RouteGroupBuilder group = app.MapGroup("/client");
 
     group.MapGet("/", async (AppDbContext db) =>
     {
