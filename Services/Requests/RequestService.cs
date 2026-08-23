@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.DTO.Request;
+using newproj.DTO.RequestHistory;
 using newproj.Models.Requests;
 
 namespace newproj.Services.Requests;
@@ -81,6 +82,18 @@ public static class RequestService
 
             Request request = Request.Create(dto);
             db.Requests.Add(request);
+            await db.SaveChangesAsync();
+
+            RequestHistoryCreateDTO historyDTO = new()
+            {
+                RequestId = request.Id,
+                UserId = request.CreatedByUserId,
+                Action = $"Request was created by User = {createdByUser.FirstName} {createdByUser.LastName}, Id={createdByUser.Id}",
+            };
+
+
+            RequestHistory newHistoryEntry = RequestHistory.Create(historyDTO);
+            db.RequestHistory.Add(newHistoryEntry);
             await db.SaveChangesAsync();
             
             return Results.Created($"/request/{request.Id}", request.ToResponse());
