@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
+using newproj.Services.Users;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,5 +18,5 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
-app.MapGet("/", () => Console.WriteLine("Started"));
+app.MapUserEndpoints();
 app.Run();
