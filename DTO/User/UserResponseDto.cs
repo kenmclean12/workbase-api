@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using newproj.Models.Users;
 
 namespace newproj.DTO.User;
@@ -16,4 +15,6 @@ public class UserResponseDto
     public UserRole Role { get; set; }
 
     public DateTime CreatedAt { get; set; }
+
+    public int? ClientId { get; set; }
 }

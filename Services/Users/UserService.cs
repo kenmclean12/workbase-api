@@ -13,7 +13,10 @@ public static class UserService
 
         group.MapGet("/", async (AppDbContext db) =>
         {
-            var users = await db.Users.ToArrayAsync();
+            var users = await db.Users
+                .Where(u => u.ClientId != null)
+                .ToArrayAsync();
+
             return Results.Ok(users.Select(u => u.ToResponse()).ToArray());
         });
 
@@ -22,6 +25,15 @@ public static class UserService
             var user = await db.Users.FindAsync(id);
             if (user is null) return Results.NotFound($"No users found with the provided id: {id}");
             return Results.Ok(user.ToResponse());
+        });
+
+        group.MapGet("/client/{clientId:int}", async (AppDbContext db, int clientId) =>
+        {
+            var users = await db.Users
+                .Where(u => u.ClientId == clientId)
+                .ToArrayAsync();
+
+            return Results.Ok(users.Select(u => u.ToResponse()).ToArray());
         });
 
         group.MapPost("/", async (AppDbContext db, UserCreateDTO dto) =>
@@ -37,6 +49,24 @@ public static class UserService
             await db.SaveChangesAsync();
 
             return Results.Created($"/user/{user.Id}", user.ToResponse());
+        });
+
+        group.MapPost("/{id:int}/reset-password", async (AppDbContext db, UserPasswordResetDTO dto, int id) =>
+        {
+            var user = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
+            if (user is null)
+            {
+                return Results.NotFound($"No user was found with the provided id: {id}");
+            }
+
+            if (!user.ResetPassword(dto))
+            {
+              return Results.BadRequest($"The provided existing password did not match the password for user id: {id}");
+            }
+
+            
+            await db.SaveChangesAsync();
+            return Results.Ok(user.ToResponse());
         });
 
         group.MapPut("/{id:int}", async (AppDbContext db, UserUpdateDTO dto, int id) =>

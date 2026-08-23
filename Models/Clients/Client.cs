@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using newproj.DTO.Client;
 using newproj.Models.Addresses;
 using newproj.Models.Base;
+using newproj.Models.Users;
 
 namespace newproj.Models.Clients;
 
@@ -24,6 +25,8 @@ public class Client : EntityBaseClass
     public string? Description { get; set; }
 
     public Address? Address { get; set; }
+
+    public ICollection<User> Users { get; set; } = [];
 
     public static Client Create(ClientCreateDTO dto)
     {

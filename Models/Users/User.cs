@@ -27,6 +27,8 @@ public class User : EntityBaseClass
 
     public UserRole Role { get; set; } = UserRole.READONLY;
 
+    public int? ClientId { get; set; }
+
     private static readonly PasswordHasher<User> _passwordHasher = new();
 
     public static User Create(UserCreateDTO dto)
@@ -40,6 +42,7 @@ public class User : EntityBaseClass
         };
 
         user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
+        if (dto.ClientId is int clientId) user.ClientId = clientId;
         return user;
     }
 
@@ -49,6 +52,19 @@ public class User : EntityBaseClass
         if (dto.LastName != null) this.LastName = dto.LastName;
         if (dto.Email != null) this.Email = dto.Email;
         if (dto.Role is UserRole role) this.Role = role;
+    }
+
+    public bool ResetPassword(UserPasswordResetDTO dto)
+    {
+        var result = _passwordHasher.VerifyHashedPassword(this, this.PasswordHash, dto.ExistingPassword);
+        if (result == PasswordVerificationResult.Success)
+        {
+            var newPasswordHash = _passwordHasher.HashPassword(this, dto.NewPassword);
+            this.PasswordHash = newPasswordHash;
+            return true;
+        }
+
+        return false;
     }
 
     public UserResponseDto ToResponse()
@@ -61,6 +77,7 @@ public class User : EntityBaseClass
             Email = this.Email,
             Role = this.Role,
             CreatedAt = this.CreatedAt,
+            ClientId = this.ClientId,
         };
     }
 }

@@ -16,8 +16,5 @@ public class UserUpdateDTO
     [MaxLength(50)]
     public string? Email { get; set; }
 
-    [MaxLength(50)]
-    public string? Password { get; set; }
-
     public UserRole? Role { get; set; }
 }
