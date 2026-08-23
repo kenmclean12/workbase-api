@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.Services.Addresses;
 using newproj.Services.Users;
+using newProj.Services.Clients;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,8 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddValidation();
+
 var app = builder.Build();
 app.UseCors("AllowLocalHost");
 
@@ -32,4 +35,5 @@ using (var scope = app.Services.CreateScope())
 app.UseHttpsRedirection();
 app.MapUserEndpoints();
 app.MapAddressEndpoints();
+app.MapClientEndpoints();
 app.Run();

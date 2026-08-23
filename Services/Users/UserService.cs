@@ -13,11 +13,8 @@ public static class UserService
 
         group.MapGet("/", async (AppDbContext db) =>
         {
-            return Results.Ok(
-              await db.Users
-                .Select(u => u.ToResponse())
-                .ToArrayAsync()
-            );
+            var users = await db.Users.ToArrayAsync();
+            return Results.Ok(users.Select(u => u.ToResponse()).ToArray());
         });
 
         group.MapGet("/{id:int}", async (AppDbContext db, int id) =>
