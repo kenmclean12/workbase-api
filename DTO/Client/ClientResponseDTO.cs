@@ -4,6 +4,10 @@ namespace newproj.DTO.Client;
 
 public class ClientResponseDTO
 {
+    public int Id { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
     public string Name { get; set; } = null!;
 
     public string? Email { get; set; }

@@ -72,11 +72,11 @@ public class User : EntityBaseClass
         return new UserResponseDto
         {
             Id = this.Id,
+            CreatedAt = this.CreatedAt,
             FirstName = this.FirstName,
             LastName = this.LastName,
             Email = this.Email,
             Role = this.Role,
-            CreatedAt = this.CreatedAt,
             ClientId = this.ClientId,
         };
     }

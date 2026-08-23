@@ -53,6 +53,8 @@ public class Client : EntityBaseClass
     {
         var response = new ClientResponseDTO
         {
+            Id = this.Id,
+            CreatedAt = this.CreatedAt,
             Name = this.Name,
             Email = this.Email,
             Phone = this.Phone,

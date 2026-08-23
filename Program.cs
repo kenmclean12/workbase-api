@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.Services.Addresses;
+using newproj.Services.Requests;
 using newproj.Services.Users;
 using newProj.Services.Clients;
 
@@ -36,4 +37,5 @@ app.UseHttpsRedirection();
 app.MapUserEndpoints();
 app.MapAddressEndpoints();
 app.MapClientEndpoints();
+app.MapRequestEndpoints();
 app.Run();
