@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.DTO.User;
-using newproj.Models.User;
+using newproj.Models.Users;
 
 namespace newproj.Services.Users;
 

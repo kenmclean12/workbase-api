@@ -1,4 +1,4 @@
-namespace newproj.Models.User;
+namespace newproj.Models.Users;
 
 public enum UserRole
 {

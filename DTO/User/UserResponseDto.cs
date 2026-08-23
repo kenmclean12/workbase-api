@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.InteropServices;
-using newproj.Models.User;
+using newproj.Models.Users;
 
 namespace newproj.DTO.User;
 
@@ -8,18 +7,11 @@ public class UserResponseDto
 {
     public int Id { get; set; }
 
-    [Required]
-    [MaxLength(25)]
-    public string FirstName { get; set; } = string.Empty;
+    public string FirstName { get; set; } = null!;
 
-    [Required]
-    [MaxLength(25)]
-    public string LastName { get; set; } = string.Empty;
+    public string LastName { get; set; } = null!;
 
-    [Required]
-    [EmailAddress]
-    [MaxLength(50)]
-    public string Email { get; set; } = string.Empty;
+    public string Email { get; set; } = null!;
 
     public UserRole Role { get; set; }
 

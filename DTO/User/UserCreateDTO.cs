@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using newproj.Models.User;
+using newproj.Models.Users;
 
 namespace newproj.DTO.User;
 

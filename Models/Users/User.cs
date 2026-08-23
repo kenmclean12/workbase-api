@@ -1,34 +1,31 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using newproj.DTO.User;
-using Npgsql.Replication;
+using newproj.Models.Base;
 
-namespace newproj.Models.User;
+namespace newproj.Models.Users;
 
-public class User
+public class User : EntityBaseClass
 {
-    public int Id { get; set; }
 
     [Required]
     [MaxLength(25)]
-    public string FirstName { get; set; } = string.Empty;
+    public string FirstName { get; set; } = String.Empty;
 
     [Required]
     [MaxLength(25)]
-    public string LastName { get; set; } = string.Empty;
+    public string LastName { get; set; } = String.Empty;
 
     [Required]
     [EmailAddress]
     [MaxLength(50)]
-    public string Email { get; set; } = string.Empty;
+    public string Email { get; set; } = String.Empty;
 
     [Required]
     [MaxLength(50)]
-    public string PasswordHash { get; set; } = string.Empty;
+    public string PasswordHash { get; set; } = String.Empty;
 
     public UserRole Role { get; set; } = UserRole.READONLY;
-
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     private static readonly PasswordHasher<User> _passwordHasher = new();
 
@@ -48,10 +45,10 @@ public class User
 
     public void Update(UserUpdateDTO dto)
     {
-        if (dto.FirstName != null) FirstName = dto.FirstName;
-        if (dto.LastName != null) LastName = dto.LastName;
-        if (dto.Email != null) Email = dto.Email;
-        if (dto.Role is UserRole role) Role = role;
+        if (dto.FirstName != null) this.FirstName = dto.FirstName;
+        if (dto.LastName != null) this.LastName = dto.LastName;
+        if (dto.Email != null) this.Email = dto.Email;
+        if (dto.Role is UserRole role) this.Role = role;
     }
 
     public UserResponseDto ToResponse()
