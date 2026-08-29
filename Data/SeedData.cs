@@ -89,6 +89,9 @@ public static class SeedData
                         ? UserRole.STANDARD
                         : UserRole.READONLY;
 
+            // First 50 users have a null ClientId; the rest point to clients[0].Id
+            int? clientId = i <= 50 ? null : clients[0].Id;
+
             var user = User.Create(new UserCreateDTO
             {
                 FirstName = firstName,
@@ -96,7 +99,7 @@ public static class SeedData
                 Email = $"user{i}@workbase.test",
                 Password = "Password123!",
                 Role = role,
-                ClientId = clients[(i - 1) % clients.Count].Id,
+                ClientId = clientId,
             });
 
             seededUsers.Add(user);
@@ -108,17 +111,17 @@ public static class SeedData
         var requests = new List<Request>();
         for (var i = 1; i <= 100; i++)
         {
-            var clientId = clients[(i - 1) % clients.Count].Id;
+            var clientIdReq = clients[(i - 1) % clients.Count].Id;
             var createdByUserId = seededUsers[(i - 1) % seededUsers.Count].Id;
             var assignedUserId = seededUsers[(i * 3 + 1) % seededUsers.Count].Id;
 
             var request = Request.Create(new RequestCreateDTO
             {
-                ClientId = clientId,
+                ClientId = clientIdReq,
                 CreatedByUserId = createdByUserId,
                 AssignedToUserId = assignedUserId,
                 Title = $"Request {i}: {GetRequestTitle(i)}",
-                Description = $"Seeded request {i} for client {clientId}. This is a generated record used for testing the WorkBase request board and workflow.",
+                Description = $"Seeded request {i} for client {clientIdReq}. This is a generated record used for testing the WorkBase request board and workflow.",
                 Status = (RequestStatus)((i - 1) % 3 + 1),
                 Priority = i % 4 == 0 ? RequestPriority.HIGH : i % 2 == 0 ? RequestPriority.MEDIUM : RequestPriority.LOW,
                 Internal = i % 5 == 0,

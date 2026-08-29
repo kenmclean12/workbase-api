@@ -21,6 +21,7 @@ public static class RequestService
             return Results.Ok(
                 requests
                     .Select(r => r.ToResponse())
+                    .OrderByDescending(r => r.Priority)
                     .ToArray()
             );
         });
@@ -49,6 +50,7 @@ public static class RequestService
             return Results.Ok(
                 requests
                   .Select(r => r.ToResponse())
+                  .OrderByDescending(r => r.Priority)
                   .ToArray()
             );
         });
@@ -63,6 +65,7 @@ public static class RequestService
             return Results.Ok(
                 requests
                   .Select(r => r.ToResponse())
+                  .OrderByDescending(r => r.Priority)
                   .ToArray()
             );
         });

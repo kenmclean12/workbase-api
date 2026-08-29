@@ -14,7 +14,16 @@ public static class UserService
         group.MapGet("/", async (AppDbContext db) =>
         {
             var users = await db.Users
-                .Where(u => u.ClientId != null)
+                .Where(u => u.ClientId == null)
+                .ToArrayAsync();
+
+            return Results.Ok(users.Select(u => u.ToResponse()).ToArray());
+        });
+
+        group.MapGet("/client/{clientId:int}", async (AppDbContext db, int clientId) =>
+        {
+            var users = await db.Users
+                .Where(u => u.ClientId == clientId)
                 .ToArrayAsync();
 
             return Results.Ok(users.Select(u => u.ToResponse()).ToArray());
@@ -25,15 +34,6 @@ public static class UserService
             var user = await db.Users.FindAsync(id);
             if (user is null) return Results.NotFound($"No users found with the provided id: {id}");
             return Results.Ok(user.ToResponse());
-        });
-
-        group.MapGet("/client/{clientId:int}", async (AppDbContext db, int clientId) =>
-        {
-            var users = await db.Users
-                .Where(u => u.ClientId == clientId)
-                .ToArrayAsync();
-
-            return Results.Ok(users.Select(u => u.ToResponse()).ToArray());
         });
 
         group.MapPost("/", async (AppDbContext db, UserCreateDTO dto) =>
