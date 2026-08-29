@@ -1,5 +1,6 @@
 using newproj.DTO.Client;
 using newproj.DTO.Request;
+using newproj.DTO.RequestHistory;
 using newproj.DTO.User;
 using newproj.Models.Clients;
 using newproj.Models.Requests;
@@ -132,6 +133,44 @@ public static class SeedData
 
         db.Requests.AddRange(requests);
         db.SaveChanges();
+
+        // -----------------------------------------------------------------
+        // Seed RequestHistory rows for Client 4 requests using the DTO factory
+        // -----------------------------------------------------------------
+        var targetClient = clients[3]; // Client 4 (0-indexed)
+        var client4Requests = db.Requests.Where(r => r.ClientId == targetClient.Id).ToList();
+
+        if (client4Requests.Any() && seededUsers.Any())
+        {
+            var historyList = new List<RequestHistory>();
+
+            foreach (var req in client4Requests)
+            {
+                historyList.Add(RequestHistory.Create(new RequestHistoryCreateDTO
+                {
+                    RequestId = req.Id,
+                    UserId = seededUsers[0].Id,
+                    Action = "CREATED",
+                }));
+
+                historyList.Add(RequestHistory.Create(new RequestHistoryCreateDTO
+                {
+                    RequestId = req.Id,
+                    UserId = seededUsers[1].Id,
+                    Action = "STATUS_CHANGED_TO_IN_PROGRESS",
+                }));
+
+                historyList.Add(RequestHistory.Create(new RequestHistoryCreateDTO
+                {
+                    RequestId = req.Id,
+                    UserId = seededUsers[2].Id,
+                    Action = "PRIORITY_UPDATED",
+                }));
+            }
+
+            db.RequestHistory.AddRange(historyList);
+            db.SaveChanges();
+        }
     }
 
     private static string GetRequestTitle(int index)
