@@ -40,5 +40,7 @@ app.MapClientEndpoints();
 app.MapRequestEndpoints();
 app.MapRequestNoteEndpoints();
 app.MapRequestHistoryEndpoints();
+//Conversation
 //Messages
+//Notifications
 app.Run();
