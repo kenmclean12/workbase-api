@@ -1,12 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 using newproj.DTO.Request;
 using newproj.Models.Base;
+using newproj.Models.Clients;
 
 namespace newproj.Models.Requests;
 
 public class Request : EntityBaseClass
 {
     public int ClientId { get; set; }
+
+    public Client Client { get; set; } = null!;
 
     public int CreatedByUserId { get; set; }
 
@@ -67,6 +70,7 @@ public class Request : EntityBaseClass
             Id = this.Id,
             CreatedAt = this.CreatedAt,
             ClientId = this.ClientId,
+            Client = this.Client.ToResponse(),
             CreatedByUserId = this.CreatedByUserId,
             AssignedToUserId = this.AssignedToUserId,
             Title = this.Title,

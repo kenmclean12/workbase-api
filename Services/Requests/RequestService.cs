@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.DTO.Request;
-using newproj.DTO.RequestHistory;
 using newproj.Helpers.RequestHistoryRecords;
 using newproj.Models.Requests;
 
@@ -15,7 +14,10 @@ public static class RequestService
 
         group.MapGet("/", async (AppDbContext db) =>
         {
-            var requests = await db.Requests.ToArrayAsync();
+            var requests = await db.Requests
+                .Include(r => r.Client)
+                .ToArrayAsync();
+
             return Results.Ok(
                 requests
                     .Select(r => r.ToResponse())
@@ -25,7 +27,10 @@ public static class RequestService
 
         group.MapGet("/{id:int}", async (AppDbContext db, int id) =>
         {
-            var request = await db.Requests.FindAsync(id);
+            var request = await db.Requests
+                .Include(r => r.Client)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
             if (request is null)
             {
                 return Results.NotFound($"No request was found with the provided id: {id}");
@@ -38,6 +43,7 @@ public static class RequestService
         {
             var requests = await db.Requests
               .Where(r => r.ClientId == clientId)
+              .Include(r => r.Client)
               .ToArrayAsync();
 
             return Results.Ok(
@@ -51,6 +57,7 @@ public static class RequestService
         {
             var requests = await db.Requests
               .Where(r => r.AssignedToUserId == userId)
+              .Include(r => r.Client)
               .ToArrayAsync();
 
             return Results.Ok(
@@ -101,6 +108,7 @@ public static class RequestService
                 await db.SaveChangesAsync();
                 await transaction.CommitAsync();
 
+                request.Client = client;
                 return Results.Created($"/request/{request.Id}", request.ToResponse());
             }
             catch
@@ -112,7 +120,10 @@ public static class RequestService
 
         group.MapPatch("/{id:int}/unassign", async (AppDbContext db, int id, int actionUserId) =>
         {
-            var request = await db.Requests.FindAsync(id);
+            var request = await db.Requests
+                .Include(r => r.Client)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
             if (request is null)
             {
                 return Results.NotFound($"No request was found with the provided id: {id}");
@@ -150,13 +161,17 @@ public static class RequestService
 
         group.MapPatch("/{id:int}", async (AppDbContext db, RequestUpdateDTO dto, int id, int actionUserId) =>
         {
-            var request = await db.Requests.FindAsync(id);
+            var request = await db.Requests
+                .Include(r => r.Client)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
             if (request is null)
             {
                 return Results.NotFound($"No request was found with the provided id: {id}");
             }
 
             if (
+                dto.AssignedToUserId is null &&
                 dto.Title is null &&
                 dto.Description is null &&
                 dto.Status is null &&

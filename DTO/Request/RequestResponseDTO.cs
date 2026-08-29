@@ -1,4 +1,5 @@
 using newproj.Models.Requests;
+using newproj.DTO.Client;
 
 namespace newproj.DTO.Request;
 
@@ -9,6 +10,8 @@ public class RequestResponseDTO
     public DateTime CreatedAt { get; set; }
 
     public int ClientId { get; set; }
+
+    public ClientResponseDTO Client { get; set; } = null!;
 
     public int CreatedByUserId { get; set; }
 
