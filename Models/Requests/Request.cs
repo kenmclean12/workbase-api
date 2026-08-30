@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using newproj.DTO.Request;
 using newproj.Models.Base;
 using newproj.Models.Clients;
+using newproj.Models.Users;
 
 namespace newproj.Models.Requests;
 
@@ -12,6 +13,8 @@ public class Request : EntityBaseClass
     public Client Client { get; set; } = null!;
 
     public int CreatedByUserId { get; set; }
+
+    public User CreatedByUser { get; set; } = null!;
 
     public int? AssignedToUserId { get; set; }
 
@@ -72,6 +75,7 @@ public class Request : EntityBaseClass
             ClientId = this.ClientId,
             Client = this.Client.ToResponse(),
             CreatedByUserId = this.CreatedByUserId,
+            CreatedByUser = this.CreatedByUser.ToResponse(),
             AssignedToUserId = this.AssignedToUserId,
             Title = this.Title,
             Description = this.Description,

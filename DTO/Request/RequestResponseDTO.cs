@@ -1,5 +1,6 @@
 using newproj.Models.Requests;
 using newproj.DTO.Client;
+using newproj.DTO.User;
 
 namespace newproj.DTO.Request;
 
@@ -14,6 +15,8 @@ public class RequestResponseDTO
     public ClientResponseDTO Client { get; set; } = null!;
 
     public int CreatedByUserId { get; set; }
+
+    public UserResponseDto CreatedByUser { get; set; } = null!;
 
     public int? AssignedToUserId { get; set; }
 

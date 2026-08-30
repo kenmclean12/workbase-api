@@ -16,6 +16,7 @@ public static class RequestService
         {
             var requests = await db.Requests
                 .Include(r => r.Client)
+                .Include(r => r.CreatedByUser)
                 .ToArrayAsync();
 
             return Results.Ok(
@@ -31,6 +32,7 @@ public static class RequestService
         {
             var request = await db.Requests
                 .Include(r => r.Client)
+                .Include(r => r.CreatedByUser)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
             if (request is null)
@@ -46,6 +48,7 @@ public static class RequestService
             var requests = await db.Requests
               .Where(r => r.ClientId == clientId)
               .Include(r => r.Client)
+              .Include(r => r.CreatedByUser)
               .ToArrayAsync();
 
             return Results.Ok(
@@ -62,6 +65,7 @@ public static class RequestService
             var requests = await db.Requests
               .Where(r => r.AssignedToUserId == userId)
               .Include(r => r.Client)
+              .Include(r => r.CreatedByUser)
               .ToArrayAsync();
 
             return Results.Ok(
@@ -115,6 +119,7 @@ public static class RequestService
                 await transaction.CommitAsync();
 
                 request.Client = client;
+                request.CreatedByUser = createdByUser;
                 return Results.Created($"/request/{request.Id}", request.ToResponse());
             }
             catch
@@ -128,6 +133,7 @@ public static class RequestService
         {
             var request = await db.Requests
                 .Include(r => r.Client)
+                .Include(r => r.CreatedByUser)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
             if (request is null)
@@ -169,6 +175,7 @@ public static class RequestService
         {
             var request = await db.Requests
                 .Include(r => r.Client)
+                .Include(r => r.CreatedByUser)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
             if (request is null)
