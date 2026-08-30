@@ -20,6 +20,17 @@ public static class UserService
             return Results.Ok(users.Select(u => u.ToResponse()).ToArray());
         });
 
+        group.MapGet("/assignable-users", async (AppDbContext db) =>
+        {
+            var users = await db.Users
+                .Where(u => u.ClientId == null)
+                .Where(u => u.Role != UserRole.READONLY)
+                .OrderByDescending(u => u.Role)
+                .ToArrayAsync();
+
+            return Results.Ok(users.Select(u => u.ToResponse()).ToArray());
+        });
+
         group.MapGet("/client/{clientId:int}", async (AppDbContext db, int clientId) =>
         {
             var users = await db.Users

@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using newproj.DTO.RequestHistory;
 using newproj.Models.Base;
+using newproj.Models.Users;
 
 namespace newproj.Models.Requests;
 
@@ -9,6 +10,8 @@ public class RequestHistory : EntityBaseClass
     public int RequestId { get; set; }
 
     public int UserId { get; set; }
+
+    public User User { get; set; } = null!;
 
     [Required]
     [MaxLength(100)]
@@ -28,11 +31,12 @@ public class RequestHistory : EntityBaseClass
     {
         return new RequestHistoryResponseDTO
         {
-            Id = Id,
-            CreatedAt = CreatedAt,
-            RequestId = RequestId,
-            UserId = UserId,
-            Action = Action,
+            Id = this.Id,
+            CreatedAt = this.CreatedAt,
+            RequestId = this.RequestId,
+            UserId = this.UserId,
+            User = this.User.ToResponse(),
+            Action = this.Action,
         };
     }
 }

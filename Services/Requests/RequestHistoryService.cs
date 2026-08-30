@@ -13,6 +13,7 @@ public static class RequestHistoryService
         {
             var historyEntries = await db.RequestHistory
               .Where(rh => rh.RequestId == requestId)
+              .Include(rh => rh.User)
               .OrderByDescending(rh => rh.CreatedAt)
               .ToArrayAsync();
 
@@ -27,6 +28,7 @@ public static class RequestHistoryService
         {
             var historyEntries = await db.RequestHistory
               .Where(rh => rh.UserId == userId)
+              .Include(rh => rh.User)
               .OrderByDescending(rh => rh.CreatedAt)
               .ToArrayAsync();
 

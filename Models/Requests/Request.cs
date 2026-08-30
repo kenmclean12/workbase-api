@@ -52,17 +52,7 @@ public class Request : EntityBaseClass
     public void Update(RequestUpdateDTO dto)
     {
         if (dto.AssignedToUserId is int assignedToUserId) this.AssignedToUserId = assignedToUserId;
-        if (dto.Title is not null) this.Title = dto.Title;
-        if (dto.Description is not null) this.Description = dto.Description;
         if (dto.Status is RequestStatus status) this.Status = status;
-        if (dto.Priority is RequestPriority priority) this.Priority = priority;
-
-        this.UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void Unassign()
-    {
-        this.AssignedToUserId = null;
         this.UpdatedAt = DateTime.UtcNow;
     }
 

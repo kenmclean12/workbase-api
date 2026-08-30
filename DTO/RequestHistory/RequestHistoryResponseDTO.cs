@@ -1,3 +1,5 @@
+using newproj.DTO.User;
+
 namespace newproj.DTO.RequestHistory;
 
 public class RequestHistoryResponseDTO
@@ -9,6 +11,8 @@ public class RequestHistoryResponseDTO
     public int RequestId { get; set; }
 
     public int UserId { get; set; }
+
+    public UserResponseDto User { get; set; } = null!;
 
     public string Action { get; set; } = null!;
 

@@ -3,6 +3,7 @@ using newproj.Data;
 using newproj.DTO.Request;
 using newproj.Helpers.RequestHistoryRecords;
 using newproj.Models.Requests;
+using newproj.Models.Users;
 
 namespace newproj.Services.Requests;
 
@@ -112,7 +113,7 @@ public static class RequestService
                     db,
                     request.Id,
                     request.CreatedByUserId,
-                    $"Request was created by User Id={createdByUser.Id}"
+                    $"Request was created by {createdByUser.FirstName} {createdByUser.LastName}"
                 );
 
                 await db.SaveChangesAsync();
@@ -129,49 +130,7 @@ public static class RequestService
             }
         });
 
-        group.MapPatch("/{id:int}/unassign", async (AppDbContext db, int id, int actionUserId) =>
-        {
-            var request = await db.Requests
-                .Include(r => r.Client)
-                .Include(r => r.CreatedByUser)
-                .FirstOrDefaultAsync(r => r.Id == id);
-
-            if (request is null)
-            {
-                return Results.NotFound($"No request was found with the provided id: {id}");
-            }
-
-            if (request.AssignedToUserId is not int assignedUserId)
-            {
-                return Results.NotFound($"No user was assigned to this request, request id: {id}");
-            }
-
-            await using var transaction = await db.Database.BeginTransactionAsync();
-
-            try
-            {
-                request.Unassign();
-
-                RequestHistoryHelpers.CreateRequestHistory(
-                    db,
-                    request.Id,
-                    actionUserId,
-                    $"User Id={assignedUserId} was unassigned from this Request, by User Id={actionUserId}"
-                );
-
-                await db.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return Results.Ok(request.ToResponse());
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
-        });
-
-        group.MapPatch("/{id:int}", async (AppDbContext db, RequestUpdateDTO dto, int id, int actionUserId) =>
+        group.MapPatch("/{id:int}", async (AppDbContext db, RequestUpdateDTO dto, int id) =>
         {
             var request = await db.Requests
                 .Include(r => r.Client)
@@ -185,14 +144,28 @@ public static class RequestService
 
             if (
                 dto.AssignedToUserId is null &&
-                dto.Title is null &&
-                dto.Description is null &&
-                dto.Status is null &&
-                dto.Priority is null
+                dto.Status is null
             )
             {
                 return Results.BadRequest($"No values were provided to update request id: {id}");
             }
+
+            User? user = await db.Users.FindAsync(dto.ActionUserId);
+            if (user is null)
+            {
+                return Results.BadRequest($"No user was found with the provided action user id: ${dto.ActionUserId}");
+            }
+
+            User? assignedUser = null;
+            if (dto.AssignedToUserId is not null) {
+                assignedUser = await db.Users.FindAsync(dto.AssignedToUserId);
+                request.Status = RequestStatus.IN_PROGRESS;
+                if (assignedUser is null)
+                {
+                    return Results.BadRequest($"No user was found with the provided assigned user id: ${dto.AssignedToUserId}");
+                }
+            }
+
 
             await using var transaction = await db.Database.BeginTransactionAsync();
 
@@ -204,48 +177,14 @@ public static class RequestService
                 RequestHistoryHelpers.CreateRequestUpdateHistory(
                     db,
                     request.Id,
-                    actionUserId,
-                    originalRequest,
-                    dto
+                    user,
+                    assignedUser
                 );
 
                 await db.SaveChangesAsync();
                 await transaction.CommitAsync();
 
                 return Results.Ok(request.ToResponse());
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
-        });
-
-        group.MapDelete("/{id:int}", async (AppDbContext db, int id, int actionUserId) =>
-        {
-            var request = await db.Requests.FindAsync(id);
-            if (request is null)
-            {
-                return Results.NotFound($"No request was found with the provided id: {id}");
-            }
-
-            await using var transaction = await db.Database.BeginTransactionAsync();
-
-            try
-            {
-                db.Requests.Remove(request);
-
-                RequestHistoryHelpers.CreateRequestHistory(
-                    db,
-                    id,
-                    actionUserId,
-                    $"User Id={actionUserId} deleted this request"
-                );
-
-                await db.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return Results.NoContent();
             }
             catch
             {
