@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using newproj.DTO.RequestNote;
 using newproj.Models.Base;
+using newproj.Models.Users;
 
 namespace newproj.Models.Requests;
 
@@ -9,6 +10,8 @@ public class RequestNote : EntityBaseClass
     public int RequestId { get; set; }
 
     public int CreatedByUserId { get; set; }
+
+    public User CreatedByUser { get; set; } = null!;
 
     [Required]
     [MaxLength(2000)]
@@ -40,12 +43,13 @@ public class RequestNote : EntityBaseClass
     {
         return new RequestNoteResponseDTO
         {
-            Id = Id,
-            CreatedAt = CreatedAt,
-            RequestId = RequestId,
-            CreatedByUserId = CreatedByUserId,
-            Content = Content,
-            UpdatedAt = UpdatedAt,
+            Id = this.Id,
+            CreatedAt = this.CreatedAt,
+            RequestId = this.RequestId,
+            CreatedByUserId = this.CreatedByUserId,
+            CreatedByUser = this.CreatedByUser.ToResponse(),
+            Content = this.Content,
+            UpdatedAt = this.UpdatedAt,
         };
     }
 }
