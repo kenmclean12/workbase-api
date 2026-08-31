@@ -30,16 +30,25 @@ public static class RequestHistoryHelpers
         AppDbContext db,
         int requestId,
         User actionUser,
-        User? assignedUser
+        User? assignedUser,
+        RequestStatus? status
     )
     {
         string actionText;
         if (assignedUser is not null)
         {
             actionText = $"{actionUser.FirstName} {actionUser.LastName} assigned {assignedUser.FirstName} {assignedUser.LastName} to this request, this client request is in progress.";
-        } else
+        }
+        else if (status == RequestStatus.DONE)
         {
-            actionText = $"{actionUser.FirstName} {actionUser.LastName} marked this task complete, this client request has been completed";
+            actionText =
+                $"{actionUser.FirstName} {actionUser.LastName} marked this task complete, " +
+                $"this client request has been completed.";
+        }
+        else
+        {
+            actionText =
+                $"{actionUser.FirstName} {actionUser.LastName} updated this request.";
         }
 
         RequestHistoryCreateDTO historyDTO = new()

@@ -178,7 +178,8 @@ public static class RequestService
                     db,
                     request.Id,
                     user,
-                    assignedUser
+                    assignedUser,
+                    dto.Status
                 );
 
                 await db.SaveChangesAsync();
