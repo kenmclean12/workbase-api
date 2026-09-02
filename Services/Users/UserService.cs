@@ -35,6 +35,7 @@ public static class UserService
         {
             var users = await db.Users
                 .Where(u => u.ClientId == clientId)
+                .OrderByDescending(u => u.Role)
                 .ToArrayAsync();
 
             return Results.Ok(users.Select(u => u.ToResponse()).ToArray());
