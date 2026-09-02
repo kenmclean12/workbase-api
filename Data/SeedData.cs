@@ -145,18 +145,15 @@ public static class SeedData
             {
                 var clientId = clients[(i - 1) % clients.Count].Id;
                 var createdByUserId = seededUsers[(i - 1) % seededUsers.Count].Id;
-                var assignedUserId = seededUsers[(i * 3 + 1) % seededUsers.Count].Id;
 
                 var request = Request.Create(new RequestCreateDTO
                 {
                     ClientId = clientId,
                     CreatedByUserId = createdByUserId,
-                    AssignedToUserId = assignedUserId,
                     Title = $"Request {i}: {GetRequestTitle(i)}",
                     Description =
                         $"Seeded request {i} for client {clientId}. " +
                         "This is a generated record used for testing the WorkBase request board and workflow.",
-                    Status = (RequestStatus)((i - 1) % 3 + 1),
                     Priority = i % 4 == 0
                         ? RequestPriority.HIGH
                         : i % 2 == 0

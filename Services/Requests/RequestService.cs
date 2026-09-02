@@ -95,15 +95,6 @@ public static class RequestService
                 return Results.NotFound($"No client was found with the provided client id: {dto.ClientId}");
             }
 
-            if (dto.AssignedToUserId is int assignedToUserId)
-            {
-                var assignedUser = await db.Users.FindAsync(assignedToUserId);
-                if (assignedUser is null)
-                {
-                    return Results.NotFound($"No user was found to assign this request to with the provided user id: {assignedToUserId}");
-                }
-            }
-
             await using var transaction = await db.Database.BeginTransactionAsync();
 
             try

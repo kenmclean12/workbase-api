@@ -40,10 +40,8 @@ public class Request : EntityBaseClass
         {
             ClientId = dto.ClientId,
             CreatedByUserId = dto.CreatedByUserId,
-            AssignedToUserId = dto.AssignedToUserId,
             Title = dto.Title,
             Description = dto.Description,
-            Status = dto.Status,
             Priority = dto.Priority,
             Internal = dto.Internal,
         };

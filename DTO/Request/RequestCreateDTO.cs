@@ -9,8 +9,6 @@ public class RequestCreateDTO
 
     public int CreatedByUserId { get; set; }
 
-    public int? AssignedToUserId { get; set; }
-
     [Required]
     [MaxLength(100)]
     public string Title { get; set; } = null!;
@@ -18,8 +16,6 @@ public class RequestCreateDTO
     [Required]
     [MaxLength(1000)]
     public string Description { get; set; } = null!;
-
-    public RequestStatus Status { get; set; } = RequestStatus.UNASSIGNED;
 
     public RequestPriority Priority { get; set; } = RequestPriority.LOW;
 
