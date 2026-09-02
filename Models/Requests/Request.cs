@@ -42,8 +42,7 @@ public class Request : EntityBaseClass
             CreatedByUserId = dto.CreatedByUserId,
             Title = dto.Title,
             Description = dto.Description,
-            Priority = dto.Priority,
-            Internal = dto.Internal,
+            Priority = dto.Priority
         };
     }
 
@@ -69,7 +68,6 @@ public class Request : EntityBaseClass
             Description = this.Description,
             Status = this.Status,
             Priority = this.Priority,
-            Internal = this.Internal,
             UpdatedAt = this.UpdatedAt,
         };
     }

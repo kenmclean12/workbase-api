@@ -28,7 +28,5 @@ public class RequestResponseDTO
 
     public RequestPriority Priority { get; set; }
 
-    public bool Internal { get; set; }
-
     public DateTime? UpdatedAt { get; set; }
 }

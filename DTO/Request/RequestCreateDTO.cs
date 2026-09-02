@@ -18,6 +18,4 @@ public class RequestCreateDTO
     public string Description { get; set; } = null!;
 
     public RequestPriority Priority { get; set; } = RequestPriority.LOW;
-
-    public bool Internal { get; set; } = false;
 }

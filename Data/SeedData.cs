@@ -159,7 +159,6 @@ public static class SeedData
                         : i % 2 == 0
                             ? RequestPriority.MEDIUM
                             : RequestPriority.LOW,
-                    Internal = i % 5 == 0,
                 });
 
                 requests.Add(request);
