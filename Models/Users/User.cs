@@ -22,7 +22,6 @@ public class User : EntityBaseClass
     public string Email { get; set; } = String.Empty;
 
     [Required]
-    [MaxLength(50)]
     public string PasswordHash { get; set; } = String.Empty;
 
     public UserRole Role { get; set; } = UserRole.READONLY;

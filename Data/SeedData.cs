@@ -12,29 +12,47 @@ public static class SeedData
 {
     public static void Initialize(AppDbContext db)
     {
-        if (db.Clients.Any() || db.Users.Any() || db.Requests.Any())
+        if (db.Clients.Any() && db.Users.Any() && db.Requests.Any())
         {
             return;
         }
 
-        var clients = Enumerable.Range(1, 100)
-            .Select(index => Client.Create(new ClientCreateDTO
-            {
-                Name = $"Client {index}",
-                Email = $"client{index}@workbase.test",
-                Phone = $"+1-555-{(1000 + index):D4}",
-                Website = $"https://client{index}.workbase.test",
-                Description = $"Seeded client record for client {index}.",
-            }))
-            .ToList();
+        using var transaction = db.Database.BeginTransaction();
 
-        db.Clients.AddRange(clients);
-        db.SaveChanges();
-
-        var seededUsers = new List<User>();
-        for (var i = 1; i <= 100; i++)
+        try
         {
-            var firstName = new[]
+            // Clear any partially seeded data from a previous failed seed.
+            db.RequestHistory.RemoveRange(db.RequestHistory);
+            db.Requests.RemoveRange(db.Requests);
+            db.Users.RemoveRange(db.Users);
+            db.Clients.RemoveRange(db.Clients);
+            db.SaveChanges();
+
+            // -----------------------------------------------------------------
+            // Clients
+            // -----------------------------------------------------------------
+
+            var clients = Enumerable.Range(1, 100)
+                .Select(index => Client.Create(new ClientCreateDTO
+                {
+                    Name = $"Client {index}",
+                    Email = $"client{index}@workbase.test",
+                    Phone = $"+1-555-{(1000 + index):D4}",
+                    Website = $"https://client{index}.workbase.test",
+                    Description = $"Seeded client record for client {index}.",
+                }))
+                .ToList();
+
+            db.Clients.AddRange(clients);
+            db.SaveChanges();
+
+            // -----------------------------------------------------------------
+            // Users
+            // -----------------------------------------------------------------
+
+            var seededUsers = new List<User>();
+
+            var firstNames = new[]
             {
                 "Ava",
                 "Liam",
@@ -56,9 +74,9 @@ public static class SeedData
                 "Elijah",
                 "Evelyn",
                 "Daniel",
-            }[i % 20];
+            };
 
-            var lastName = new[]
+            var lastNames = new[]
             {
                 "Smith",
                 "Johnson",
@@ -80,96 +98,128 @@ public static class SeedData
                 "Robinson",
                 "Clark",
                 "Rodriguez",
-            }[i % 20];
+            };
 
-            var role = i % 10 == 0
-                ? UserRole.SUPERADMIN
-                : i % 5 == 0
-                    ? UserRole.ADMIN
-                    : i % 3 == 0
-                        ? UserRole.STANDARD
-                        : UserRole.READONLY;
-
-            // First 50 users have a null ClientId; the rest point to clients[0].Id
-            int? clientId = i <= 50 ? null : clients[0].Id;
-
-            var user = User.Create(new UserCreateDTO
+            for (var i = 1; i <= 100; i++)
             {
-                FirstName = firstName,
-                LastName = lastName,
-                Email = $"user{i}@workbase.test",
-                Password = "Password123!",
-                Role = role,
-                ClientId = clientId,
-            });
+                var firstName = firstNames[(i - 1) % firstNames.Length];
+                var lastName = lastNames[(i - 1) % lastNames.Length];
 
-            seededUsers.Add(user);
-        }
+                var role = i % 10 == 0
+                    ? UserRole.SUPERADMIN
+                    : i % 5 == 0
+                        ? UserRole.ADMIN
+                        : i % 3 == 0
+                            ? UserRole.STANDARD
+                            : UserRole.READONLY;
 
-        db.Users.AddRange(seededUsers);
-        db.SaveChanges();
+                // First 50 users have no client.
+                // Remaining 50 users all belong to Client 1.
+                int? clientId = i <= 50
+                    ? null
+                    : clients[0].Id;
 
-        var requests = new List<Request>();
-        for (var i = 1; i <= 100; i++)
-        {
-            var clientIdReq = clients[(i - 1) % clients.Count].Id;
-            var createdByUserId = seededUsers[(i - 1) % seededUsers.Count].Id;
-            var assignedUserId = seededUsers[(i * 3 + 1) % seededUsers.Count].Id;
-
-            var request = Request.Create(new RequestCreateDTO
-            {
-                ClientId = clientIdReq,
-                CreatedByUserId = createdByUserId,
-                AssignedToUserId = assignedUserId,
-                Title = $"Request {i}: {GetRequestTitle(i)}",
-                Description = $"Seeded request {i} for client {clientIdReq}. This is a generated record used for testing the WorkBase request board and workflow.",
-                Status = (RequestStatus)((i - 1) % 3 + 1),
-                Priority = i % 4 == 0 ? RequestPriority.HIGH : i % 2 == 0 ? RequestPriority.MEDIUM : RequestPriority.LOW,
-                Internal = i % 5 == 0,
-            });
-
-            requests.Add(request);
-        }
-
-        db.Requests.AddRange(requests);
-        db.SaveChanges();
-
-        // -----------------------------------------------------------------
-        // Seed RequestHistory rows for Client 4 requests using the DTO factory
-        // -----------------------------------------------------------------
-        var targetClient = clients[3]; // Client 4 (0-indexed)
-        var client4Requests = db.Requests.Where(r => r.ClientId == targetClient.Id).ToList();
-
-        if (client4Requests.Any() && seededUsers.Any())
-        {
-            var historyList = new List<RequestHistory>();
-
-            foreach (var req in client4Requests)
-            {
-                historyList.Add(RequestHistory.Create(new RequestHistoryCreateDTO
+                var user = User.Create(new UserCreateDTO
                 {
-                    RequestId = req.Id,
-                    UserId = seededUsers[0].Id,
-                    Action = "CREATED",
-                }));
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Email = $"user{i}@workbase.test",
+                    Password = "Password123!",
+                    Role = role,
+                    ClientId = clientId,
+                });
 
-                historyList.Add(RequestHistory.Create(new RequestHistoryCreateDTO
-                {
-                    RequestId = req.Id,
-                    UserId = seededUsers[1].Id,
-                    Action = "STATUS_CHANGED_TO_IN_PROGRESS",
-                }));
-
-                historyList.Add(RequestHistory.Create(new RequestHistoryCreateDTO
-                {
-                    RequestId = req.Id,
-                    UserId = seededUsers[2].Id,
-                    Action = "PRIORITY_UPDATED",
-                }));
+                seededUsers.Add(user);
             }
 
-            db.RequestHistory.AddRange(historyList);
+            db.Users.AddRange(seededUsers);
             db.SaveChanges();
+
+            // -----------------------------------------------------------------
+            // Requests
+            // -----------------------------------------------------------------
+
+            var requests = new List<Request>();
+
+            for (var i = 1; i <= 100; i++)
+            {
+                var clientId = clients[(i - 1) % clients.Count].Id;
+                var createdByUserId = seededUsers[(i - 1) % seededUsers.Count].Id;
+                var assignedUserId = seededUsers[(i * 3 + 1) % seededUsers.Count].Id;
+
+                var request = Request.Create(new RequestCreateDTO
+                {
+                    ClientId = clientId,
+                    CreatedByUserId = createdByUserId,
+                    AssignedToUserId = assignedUserId,
+                    Title = $"Request {i}: {GetRequestTitle(i)}",
+                    Description =
+                        $"Seeded request {i} for client {clientId}. " +
+                        "This is a generated record used for testing the WorkBase request board and workflow.",
+                    Status = (RequestStatus)((i - 1) % 3 + 1),
+                    Priority = i % 4 == 0
+                        ? RequestPriority.HIGH
+                        : i % 2 == 0
+                            ? RequestPriority.MEDIUM
+                            : RequestPriority.LOW,
+                    Internal = i % 5 == 0,
+                });
+
+                requests.Add(request);
+            }
+
+            db.Requests.AddRange(requests);
+            db.SaveChanges();
+
+            // -----------------------------------------------------------------
+            // Request History
+            // Seed history for Client 4 requests.
+            // -----------------------------------------------------------------
+
+            var targetClient = clients[3];
+
+            var client4Requests = db.Requests
+                .Where(r => r.ClientId == targetClient.Id)
+                .ToList();
+
+            if (client4Requests.Any())
+            {
+                var historyList = new List<RequestHistory>();
+
+                foreach (var request in client4Requests)
+                {
+                    historyList.Add(RequestHistory.Create(new RequestHistoryCreateDTO
+                    {
+                        RequestId = request.Id,
+                        UserId = seededUsers[0].Id,
+                        Action = "CREATED",
+                    }));
+
+                    historyList.Add(RequestHistory.Create(new RequestHistoryCreateDTO
+                    {
+                        RequestId = request.Id,
+                        UserId = seededUsers[1].Id,
+                        Action = "STATUS_CHANGED_TO_IN_PROGRESS",
+                    }));
+
+                    historyList.Add(RequestHistory.Create(new RequestHistoryCreateDTO
+                    {
+                        RequestId = request.Id,
+                        UserId = seededUsers[2].Id,
+                        Action = "PRIORITY_UPDATED",
+                    }));
+                }
+
+                db.RequestHistory.AddRange(historyList);
+                db.SaveChanges();
+            }
+
+            transaction.Commit();
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
         }
     }
 

@@ -24,7 +24,8 @@ public static class RequestService
                 requests
                     .Select(r => r.ToResponse())
                     .OrderByDescending(r => r.Priority)
-                    .OrderByDescending(r => r.UpdatedAt)
+                    .ThenByDescending(r => r.UpdatedAt)
+                    .ThenByDescending(r => r.CreatedAt)
                     .ToArray()
             );
         });
@@ -56,7 +57,8 @@ public static class RequestService
                 requests
                   .Select(r => r.ToResponse())
                   .OrderByDescending(r => r.Priority)
-                  .OrderByDescending(r => r.UpdatedAt)
+                    .ThenByDescending(r => r.UpdatedAt)
+                    .ThenByDescending(r => r.CreatedAt)
                   .ToArray()
             );
         });
@@ -73,7 +75,8 @@ public static class RequestService
                 requests
                   .Select(r => r.ToResponse())
                   .OrderByDescending(r => r.Priority)
-                  .OrderByDescending(r => r.UpdatedAt)
+                    .ThenByDescending(r => r.UpdatedAt)
+                    .ThenByDescending(r => r.CreatedAt)
                   .ToArray()
             );
         });
@@ -157,7 +160,8 @@ public static class RequestService
             }
 
             User? assignedUser = null;
-            if (dto.AssignedToUserId is not null) {
+            if (dto.AssignedToUserId is not null)
+            {
                 assignedUser = await db.Users.FindAsync(dto.AssignedToUserId);
                 request.Status = RequestStatus.IN_PROGRESS;
                 if (assignedUser is null)
