@@ -9,6 +9,8 @@ public class RequestHistory : EntityBaseClass
 {
     public int RequestId { get; set; }
 
+    public Request Request { get; set; } = null!;
+
     public int UserId { get; set; }
 
     public User User { get; set; } = null!;
@@ -33,6 +35,7 @@ public class RequestHistory : EntityBaseClass
         {
             Id = this.Id,
             CreatedAt = this.CreatedAt,
+            Request = this.Request.ToResponse(),
             RequestId = this.RequestId,
             UserId = this.UserId,
             User = this.User.ToResponse(),
