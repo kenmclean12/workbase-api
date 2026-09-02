@@ -37,6 +37,7 @@ public class User : EntityBaseClass
             FirstName = dto.FirstName,
             LastName = dto.LastName,
             Email = dto.Email,
+            ClientId = dto.ClientId,
             Role = dto.Role,
         };
 

@@ -28,11 +28,11 @@ public class Address : EntityBaseClass
     [MaxLength(25)]
     public string PostalCode { get; set; }  = String.Empty;
 
-    public static Address Create(AddressCreateDTO dto)
+    public static Address Create(AddressCreateDTO dto, int clientId)
     {
         return new Address
         {
-            ClientId = dto.ClientId,
+            ClientId = clientId,
             Street = dto.Street,
             City = dto.City,
             State = dto.State,

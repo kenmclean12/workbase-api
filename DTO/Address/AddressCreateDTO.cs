@@ -4,8 +4,6 @@ namespace newproj.DTO.Address;
 
 public class AddressCreateDTO
 {
-    public int ClientId { get; set; }
-
     [Required]
     [MaxLength(50)]
     public string Street { get; set; } = null!;
