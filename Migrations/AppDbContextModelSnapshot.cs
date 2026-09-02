@@ -181,6 +181,8 @@ namespace newproj.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("RequestId");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("RequestHistory");
@@ -291,11 +293,19 @@ namespace newproj.Migrations
 
             modelBuilder.Entity("newproj.Models.Requests.RequestHistory", b =>
                 {
+                    b.HasOne("newproj.Models.Requests.Request", "Request")
+                        .WithMany()
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("newproj.Models.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Request");
 
                     b.Navigation("User");
                 });
