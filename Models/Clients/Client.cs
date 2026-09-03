@@ -12,6 +12,7 @@ public class Client : EntityBaseClass
     [MaxLength(30)]
     public string Name { get; set; } = String.Empty;
 
+    [EmailAddress]
     [MaxLength(50)]
     public string? Email { get; set; }
 

@@ -67,9 +67,9 @@ public class User : EntityBaseClass
         return false;
     }
 
-    public UserResponseDto ToResponse()
+    public UserResponseDTO ToResponse()
     {
-        return new UserResponseDto
+        return new UserResponseDTO
         {
             Id = this.Id,
             CreatedAt = this.CreatedAt,

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using newproj.Models.Addresses;
 using newproj.Models.Clients;
 using newproj.Models.Requests;
+using newproj.Models.UserInvites;
 using newproj.Models.Users;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
@@ -18,4 +19,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<RequestNote> RequestNotes { get; set; }
 
     public DbSet<RequestHistory> RequestHistory { get; set; }
+
+    public DbSet<UserInvite> UserInvites { get; set; }
 }

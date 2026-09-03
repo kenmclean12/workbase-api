@@ -16,7 +16,7 @@ public class RequestResponseDTO
 
     public int CreatedByUserId { get; set; }
 
-    public UserResponseDto CreatedByUser { get; set; } = null!;
+    public UserResponseDTO CreatedByUser { get; set; } = null!;
 
     public int? AssignedToUserId { get; set; }
 

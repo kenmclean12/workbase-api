@@ -15,7 +15,7 @@ public class RequestHistoryResponseDTO
 
     public int UserId { get; set; }
 
-    public UserResponseDto User { get; set; } = null!;
+    public UserResponseDTO User { get; set; } = null!;
 
     public string Action { get; set; } = null!;
 

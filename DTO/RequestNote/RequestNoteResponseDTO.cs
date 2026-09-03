@@ -12,7 +12,7 @@ public class RequestNoteResponseDTO
 
     public int CreatedByUserId { get; set; }
 
-    public UserResponseDto CreatedByUser { get; set; } = null!;
+    public UserResponseDTO CreatedByUser { get; set; } = null!;
 
     public string Content { get; set; } = null!;
 

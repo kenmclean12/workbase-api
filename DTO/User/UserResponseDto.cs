@@ -2,7 +2,7 @@ using newproj.Models.Users;
 
 namespace newproj.DTO.User;
 
-public class UserResponseDto
+public class UserResponseDTO
 {
     public int Id { get; set; }
 
