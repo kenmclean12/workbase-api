@@ -2532,11 +2532,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/kenmclean/Desktop/coding1/newproj/newproj.csproj",
+      "projectUniqueName": "/Users/kenmclean/Desktop/C#/newproj/newproj.csproj",
       "projectName": "newproj",
-      "projectPath": "/Users/kenmclean/Desktop/coding1/newproj/newproj.csproj",
+      "projectPath": "/Users/kenmclean/Desktop/C#/newproj/newproj.csproj",
       "packagesPath": "/Users/kenmclean/.nuget/packages/",
-      "outputPath": "/Users/kenmclean/Desktop/coding1/newproj/obj/",
+      "outputPath": "/Users/kenmclean/Desktop/C#/newproj/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/kenmclean/.nuget/NuGet/NuGet.Config"

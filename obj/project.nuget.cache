@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "zTi0OwSfohk=",
+  "dgSpecHash": "8IYt8wa+T6U=",
   "success": true,
-  "projectFilePath": "/Users/kenmclean/Desktop/coding1/newproj/newproj.csproj",
+  "projectFilePath": "/Users/kenmclean/Desktop/C#/newproj/newproj.csproj",
   "expectedPackageFiles": [
     "/Users/kenmclean/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
     "/Users/kenmclean/.nuget/packages/microsoft.aspnetcore.openapi/10.0.10/microsoft.aspnetcore.openapi.10.0.10.nupkg.sha512",
@@ -45,9 +45,9 @@
       "code": "NU1903",
       "level": "Warning",
       "message": "Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc",
-      "projectPath": "/Users/kenmclean/Desktop/coding1/newproj/newproj.csproj",
+      "projectPath": "/Users/kenmclean/Desktop/C#/newproj/newproj.csproj",
       "warningLevel": 1,
-      "filePath": "/Users/kenmclean/Desktop/coding1/newproj/newproj.csproj",
+      "filePath": "/Users/kenmclean/Desktop/C#/newproj/newproj.csproj",
       "libraryId": "Microsoft.OpenApi",
       "targetGraphs": [
         "net10.0"
