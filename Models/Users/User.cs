@@ -54,10 +54,15 @@ public class User : EntityBaseClass
         if (dto.Role is UserRole role) this.Role = role;
     }
 
+    public bool VerifyPassword(string password)
+    {
+        return _passwordHasher.VerifyHashedPassword(this, this.PasswordHash, password) != PasswordVerificationResult.Failed;
+    }
+
     public bool ResetPassword(UserPasswordResetDTO dto)
     {
         var result = _passwordHasher.VerifyHashedPassword(this, this.PasswordHash, dto.ExistingPassword);
-        if (result == PasswordVerificationResult.Success)
+        if (result != PasswordVerificationResult.Failed)
         {
             var newPasswordHash = _passwordHasher.HashPassword(this, dto.NewPassword);
             this.PasswordHash = newPasswordHash;

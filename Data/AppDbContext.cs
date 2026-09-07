@@ -1,6 +1,7 @@
 namespace newproj.Data;
 using Microsoft.EntityFrameworkCore;
 using newproj.Models.Addresses;
+using newproj.Models.Auth;
 using newproj.Models.Clients;
 using newproj.Models.Requests;
 using newproj.Models.UserInvites;
@@ -21,4 +22,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<RequestHistory> RequestHistory { get; set; }
 
     public DbSet<UserInvite> UserInvites { get; set; }
+
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 }

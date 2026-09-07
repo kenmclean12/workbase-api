@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.Services.Addresses;
+using newproj.Services.Auth;
 using newproj.Services.Requests;
 using newproj.Services.UserInvites;
 using newproj.Services.Users;
@@ -36,6 +37,7 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
+app.MapAuthEndpoints();
 app.MapUserEndpoints();
 app.MapAddressEndpoints();
 app.MapClientEndpoints();

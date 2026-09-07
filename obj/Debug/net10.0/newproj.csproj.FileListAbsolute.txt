@@ -298,3 +298,9 @@
 /Users/kenmclean/Desktop/C#/newproj/obj/Debug/net10.0/newproj.pdb
 /Users/kenmclean/Desktop/C#/newproj/obj/Debug/net10.0/newproj.genruntimeconfig.cache
 /Users/kenmclean/Desktop/C#/newproj/obj/Debug/net10.0/ref/newproj.dll
+/Users/kenmclean/Desktop/C#/newproj/bin/Debug/net10.0/Microsoft.Bcl.Cryptography.dll
+/Users/kenmclean/Desktop/C#/newproj/bin/Debug/net10.0/Microsoft.IdentityModel.Abstractions.dll
+/Users/kenmclean/Desktop/C#/newproj/bin/Debug/net10.0/Microsoft.IdentityModel.JsonWebTokens.dll
+/Users/kenmclean/Desktop/C#/newproj/bin/Debug/net10.0/Microsoft.IdentityModel.Logging.dll
+/Users/kenmclean/Desktop/C#/newproj/bin/Debug/net10.0/Microsoft.IdentityModel.Tokens.dll
+/Users/kenmclean/Desktop/C#/newproj/bin/Debug/net10.0/System.IdentityModel.Tokens.Jwt.dll
