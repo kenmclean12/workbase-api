@@ -95,8 +95,6 @@ namespace newproj.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("RefreshTokens");
                 });
 
@@ -345,17 +343,6 @@ namespace newproj.Migrations
                         .HasForeignKey("newproj.Models.Addresses.Address", "ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("newproj.Models.Auth.RefreshToken", b =>
-                {
-                    b.HasOne("newproj.Models.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("newproj.Models.Requests.Request", b =>
