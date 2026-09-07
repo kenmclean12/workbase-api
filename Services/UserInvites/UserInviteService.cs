@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.DTO.UserInvite;
@@ -36,11 +37,16 @@ public static class UserInviteService
         {
             for (int i = 0; i < dto.Emails.Length; i++)
             {
+                byte[] tokenBytes = RandomNumberGenerator.GetBytes(32);
+                string token = Convert.ToBase64String(tokenBytes);
+                string tokenHash = Convert.ToBase64String(SHA256.HashData(tokenBytes));
+
                 var createDTO = new UserInviteCreateDTO
                 {
                     Email = dto.Emails[i],
                     Role = dto.Role,
                     ClientId = dto.ClientId,
+                    TokenHash = tokenHash,
                     InvitedByUserId = dto.InvitedByUserId,
                 };
 

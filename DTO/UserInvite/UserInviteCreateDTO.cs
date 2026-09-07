@@ -12,6 +12,8 @@ public class UserInviteCreateDTO
 
     public UserRole? Role { get; set; }
 
+    public string TokenHash { get; set; } = null!;
+
     public int? ClientId { get; set; }
 
     public int InvitedByUserId { get; set; }

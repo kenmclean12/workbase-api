@@ -36,6 +36,7 @@ public class UserInvite : EntityBaseClass
        {
            Email = dto.Email,
            InvitedByUserId = dto.InvitedByUserId,
+           TokenHash = dto.TokenHash,
            ClientId = dto.ClientId,
        };
 
