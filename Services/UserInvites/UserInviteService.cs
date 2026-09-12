@@ -10,7 +10,7 @@ public static class UserInviteService
 {
     public static void MapUserInviteEndpoints(this WebApplication app)
     {
-        RouteGroupBuilder group = app.MapGroup("/user-invites");
+        RouteGroupBuilder group = app.MapGroup("/user-invites").RequireAuthorization();
 
         group.MapGet("/pending", async (AppDbContext db) =>
         {

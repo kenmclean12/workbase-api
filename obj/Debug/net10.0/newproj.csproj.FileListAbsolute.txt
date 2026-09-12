@@ -304,3 +304,6 @@
 /Users/kenmclean/Desktop/C#/newproj/bin/Debug/net10.0/Microsoft.IdentityModel.Logging.dll
 /Users/kenmclean/Desktop/C#/newproj/bin/Debug/net10.0/Microsoft.IdentityModel.Tokens.dll
 /Users/kenmclean/Desktop/C#/newproj/bin/Debug/net10.0/System.IdentityModel.Tokens.Jwt.dll
+/Users/kenmclean/Desktop/C#/newproj/bin/Debug/net10.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
+/Users/kenmclean/Desktop/C#/newproj/bin/Debug/net10.0/Microsoft.IdentityModel.Protocols.dll
+/Users/kenmclean/Desktop/C#/newproj/bin/Debug/net10.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll

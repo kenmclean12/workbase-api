@@ -9,7 +9,7 @@ public static class UserService
 {
     public static void MapUserEndpoints(this WebApplication app)
     {
-        RouteGroupBuilder group = app.MapGroup("/user");
+        RouteGroupBuilder group = app.MapGroup("/user").RequireAuthorization();
 
         group.MapGet("/", async (AppDbContext db) =>
         {

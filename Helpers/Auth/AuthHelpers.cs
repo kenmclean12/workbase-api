@@ -18,7 +18,7 @@ public static class AuthHelpers
                 new Claim(ClaimTypes.Role, user.Role.ToString())
             };
 
-        SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
+        SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes(config["Auth:Key"]!));
 
         SigningCredentials credentials = new(
             securityKey,

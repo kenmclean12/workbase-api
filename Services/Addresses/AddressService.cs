@@ -8,7 +8,7 @@ public static class AddressService
 {
     public static void MapAddressEndpoints(this WebApplication app)
     {
-        RouteGroupBuilder group = app.MapGroup("/address");
+        RouteGroupBuilder group = app.MapGroup("/address").RequireAuthorization();
 
         group.MapPut("/{clientId:int}", async (AppDbContext db, AddressUpdateDTO dto, int clientId) =>
         {

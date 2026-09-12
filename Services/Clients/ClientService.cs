@@ -12,7 +12,7 @@ public static class ClientService
 {
   public static void MapClientEndpoints(this WebApplication app)
   {
-    RouteGroupBuilder group = app.MapGroup("/client");
+    RouteGroupBuilder group = app.MapGroup("/client").RequireAuthorization();
 
     group.MapGet("/", async (AppDbContext db) =>
     {

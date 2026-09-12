@@ -7,7 +7,7 @@ public static class RequestHistoryService
 {
     public static void MapRequestHistoryEndpoints(this WebApplication app)
     {
-        RouteGroupBuilder group = app.MapGroup("/request-history");
+        RouteGroupBuilder group = app.MapGroup("/request-history").RequireAuthorization();
 
         group.MapGet("/request/{requestId:int}", async (AppDbContext db, int requestId) =>
         {

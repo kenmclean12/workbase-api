@@ -9,7 +9,7 @@ public static class RequestNoteService
 {
     public static void MapRequestNoteEndpoints(this WebApplication app)
     {
-        RouteGroupBuilder group = app.MapGroup("/request-note");
+        RouteGroupBuilder group = app.MapGroup("/request-note").RequireAuthorization();
 
         group.MapGet("/request/{requestId:int}", async (AppDbContext db, int requestId) =>
         {

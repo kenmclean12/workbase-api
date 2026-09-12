@@ -11,7 +11,7 @@ public static class RequestService
 {
     public static void MapRequestEndpoints(this WebApplication app)
     {
-        RouteGroupBuilder group = app.MapGroup("/request");
+        RouteGroupBuilder group = app.MapGroup("/request").RequireAuthorization();
 
         group.MapGet("/", async (AppDbContext db) =>
         {
