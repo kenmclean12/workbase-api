@@ -56,7 +56,8 @@ public static class UserInviteService
 
             await db.SaveChangesAsync();
             return Results.NoContent();
-        });
+        })
+            .RequireAuthorization("AdminOrManager");
 
         group.MapDelete("/{id:int}", async (AppDbContext db, int id) =>
         {
@@ -70,6 +71,7 @@ public static class UserInviteService
             await db.SaveChangesAsync();
 
             return Results.NoContent();
-        });
+        })
+            .RequireAuthorization("AdminOrManager");
     }
 }

@@ -9,6 +9,7 @@ using newProj.Services.Clients;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using newproj.Models.Users;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,7 +30,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ClockSkew = TimeSpan.Zero
     };
 });
-builder.Services.AddAuthorization();
+
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("AdminOrManager", policy =>
+        {
+            policy.RequireRole(UserRole.ADMIN.ToString(), UserRole.SUPERADMIN.ToString());
+        })
+    .AddPolicy("BlockReadonly", policy =>
+    {
+        policy.RequireAssertion(context => !context.User.IsInRole(UserRole.READONLY.ToString()));
+    });
 
 builder.Services.AddCors(options =>
 {

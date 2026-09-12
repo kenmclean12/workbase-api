@@ -15,7 +15,8 @@ public static class AuthHelpers
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role.ToString())
+                new Claim(ClaimTypes.Role, user.Role.ToString()),
+                new Claim("client_id", user.ClientId?.ToString() ?? "")
             };
 
         SymmetricSecurityKey securityKey = new(Encoding.UTF8.GetBytes(config["Auth:Key"]!));

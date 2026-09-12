@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.DTO.User;
@@ -63,8 +65,13 @@ public static class UserService
             return Results.Created($"/user/{user.Id}", user.ToResponse());
         });
 
-        group.MapPost("/{id:int}/reset-password", async (AppDbContext db, UserPasswordResetDTO dto, int id) =>
+        group.MapPost("/reset-password", async (AppDbContext db, HttpContext context, UserPasswordResetDTO dto) =>
         {
+            if (!int.TryParse(context.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out int id))
+            {
+                return Results.Forbid();
+            }
+
             var user = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
             if (user is null)
             {
