@@ -149,7 +149,6 @@ public static class SeedData
                 var request = Request.Create(new RequestCreateDTO
                 {
                     ClientId = clientId,
-                    CreatedByUserId = createdByUserId,
                     Title = $"Request {i}: {GetRequestTitle(i)}",
                     Description =
                         $"Seeded request {i} for client {clientId}. " +
@@ -159,7 +158,7 @@ public static class SeedData
                         : i % 2 == 0
                             ? RequestPriority.MEDIUM
                             : RequestPriority.LOW,
-                });
+                }, createdByUserId);
 
                 requests.Add(request);
             }
