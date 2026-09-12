@@ -7,8 +7,6 @@ public class RequestCreateDTO
 {
     public int ClientId { get; set; }
 
-    public int CreatedByUserId { get; set; }
-
     [Required]
     [MaxLength(100)]
     public string Title { get; set; } = null!;

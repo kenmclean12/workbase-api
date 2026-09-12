@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.DTO.Request;
@@ -81,12 +83,22 @@ public static class RequestService
             );
         });
 
-        group.MapPost("/", async (AppDbContext db, RequestCreateDTO dto) =>
+        group.MapPost("/", async (AppDbContext db, HttpContext context, RequestCreateDTO dto) =>
         {
-            var createdByUser = await db.Users.FindAsync(dto.CreatedByUserId);
+            if (!int.TryParse(context.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out int createdByUserId))
+            {
+                return Results.Forbid();
+            }
+
+            if (!int.TryParse(context.User.FindFirstValue("client_id"), out int requestUserClientId) || requestUserClientId != dto.ClientId)
+            {
+                return Results.Forbid();
+            }
+
+            var createdByUser = await db.Users.FindAsync(createdByUserId);
             if (createdByUser is null)
             {
-                return Results.NotFound($"No user was found with the provided creating user id: {dto.CreatedByUserId}");
+                return Results.NotFound($"No user was found with the provided creating user id: {createdByUserId}");
             }
 
             var client = await db.Clients.FindAsync(dto.ClientId);
@@ -99,7 +111,7 @@ public static class RequestService
 
             try
             {
-                Request request = Request.Create(dto);
+                Request request = Request.Create(dto, createdByUserId);
                 db.Requests.Add(request);
                 await db.SaveChangesAsync();
 
@@ -122,9 +134,10 @@ public static class RequestService
                 await transaction.RollbackAsync();
                 throw;
             }
-        });
+        })
+            .RequireAuthorization("BlockReadonly");
 
-        group.MapPatch("/{id:int}", async (AppDbContext db, RequestUpdateDTO dto, int id) =>
+        group.MapPatch("/{id:int}", async (AppDbContext db, HttpContext context, RequestUpdateDTO dto, int id) =>
         {
             var request = await db.Requests
                 .Include(r => r.Client)
@@ -144,29 +157,30 @@ public static class RequestService
                 return Results.BadRequest($"No values were provided to update request id: {id}");
             }
 
-            User? user = await db.Users.FindAsync(dto.ActionUserId);
+            if (!int.TryParse(context.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out int actionUserId)) {
+                return Results.Forbid();
+            }
+
+            User? user = await db.Users.FindAsync(actionUserId);
             if (user is null)
             {
-                return Results.BadRequest($"No user was found with the provided action user id: ${dto.ActionUserId}");
+                return Results.BadRequest($"No user was found with the provided action user id: {actionUserId}");
             }
 
             User? assignedUser = null;
             if (dto.AssignedToUserId is not null)
             {
                 assignedUser = await db.Users.FindAsync(dto.AssignedToUserId);
-                request.Status = RequestStatus.IN_PROGRESS;
                 if (assignedUser is null)
                 {
-                    return Results.BadRequest($"No user was found with the provided assigned user id: ${dto.AssignedToUserId}");
+                    return Results.BadRequest($"No user was found with the provided assigned user id: {dto.AssignedToUserId}");
                 }
             }
-
 
             await using var transaction = await db.Database.BeginTransactionAsync();
 
             try
             {
-                var originalRequest = request.ToResponse();
                 request.Update(dto);
 
                 RequestHistoryHelpers.CreateRequestUpdateHistory(
@@ -187,6 +201,7 @@ public static class RequestService
                 await transaction.RollbackAsync();
                 throw;
             }
-        });
+        })
+            .RequireAuthorization("BlockReadonly");
     }
 }

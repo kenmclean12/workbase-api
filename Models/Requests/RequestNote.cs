@@ -19,12 +19,12 @@ public class RequestNote : EntityBaseClass
 
     public DateTime? UpdatedAt { get; set; }
 
-    public static RequestNote Create(RequestNoteCreateDTO dto)
+    public static RequestNote Create(RequestNoteCreateDTO dto, int createdByUserId)
     {
         return new RequestNote
         {
             RequestId = dto.RequestId,
-            CreatedByUserId = dto.CreatedByUserId,
+            CreatedByUserId = createdByUserId,
             Content = dto.Content,
         };
     }

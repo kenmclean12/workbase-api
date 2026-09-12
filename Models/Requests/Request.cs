@@ -34,12 +34,12 @@ public class Request : EntityBaseClass
 
     public DateTime? UpdatedAt { get; set; }
 
-    public static Request Create(RequestCreateDTO dto)
+    public static Request Create(RequestCreateDTO dto, int createdByUserId)
     {
         return new Request
         {
             ClientId = dto.ClientId,
-            CreatedByUserId = dto.CreatedByUserId,
+            CreatedByUserId = createdByUserId,
             Title = dto.Title,
             Description = dto.Description,
             Priority = dto.Priority
@@ -48,7 +48,11 @@ public class Request : EntityBaseClass
 
     public void Update(RequestUpdateDTO dto)
     {
-        if (dto.AssignedToUserId is int assignedToUserId) this.AssignedToUserId = assignedToUserId;
+        if (dto.AssignedToUserId is int assignedToUserId) {
+            this.AssignedToUserId = assignedToUserId;
+            this.Status = RequestStatus.IN_PROGRESS;
+        }
+
         if (dto.Status is RequestStatus status) this.Status = status;
         this.UpdatedAt = DateTime.UtcNow;
     }

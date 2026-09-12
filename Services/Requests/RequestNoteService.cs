@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.DTO.RequestNote;
@@ -25,23 +27,27 @@ public static class RequestNoteService
             );
         });
 
-        group.MapPost("/", async (AppDbContext db, RequestNoteCreateDTO dto) =>
+        group.MapPost("/", async (AppDbContext db, HttpContext context, RequestNoteCreateDTO dto) =>
         {
-            var request = await db.Requests.FindAsync(dto.RequestId);
+            if (!int.TryParse(context.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out int createdByUserId))
+            {
+                return Results.Forbid();
+            }
 
+            var request = await db.Requests.FindAsync(dto.RequestId);
             if (request is null)
             {
                 return Results.NotFound($"No request was found with the provided id: {dto.RequestId}");
             }
 
-            var user = await db.Users.FindAsync(dto.CreatedByUserId);
+            var user = await db.Users.FindAsync(createdByUserId);
 
             if (user is null)
             {
-                return Results.NotFound($"No user was found with the provided id: {dto.CreatedByUserId}");
+                return Results.NotFound($"No user was found with the provided id: {createdByUserId}");
             }
 
-            var note = RequestNote.Create(dto);
+            var note = RequestNote.Create(dto, createdByUserId);
 
             db.RequestNotes.Add(note);
             await db.SaveChangesAsync();
@@ -50,36 +56,47 @@ public static class RequestNoteService
                 $"/request-note/{note.Id}",
                 note.ToResponse()
             );
-        });
+        })
+            .RequireAuthorization("BlockReadonly");
 
-        group.MapPut("/{id:int}", async (AppDbContext db, RequestNoteUpdateDTO dto, int id) =>
+        group.MapPut("/{id:int}", async (AppDbContext db, HttpContext context, RequestNoteUpdateDTO dto, int id) =>
         {
             var note = await db.RequestNotes.FindAsync(id);
-
             if (note is null)
             {
                 return Results.NotFound($"No request note was found with the provided id: {id}");
+            }
+
+            if (!int.TryParse(context.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out int userId) || userId != note.CreatedByUserId)
+            {
+                return Results.Forbid();
             }
 
             note.Update(dto);
             await db.SaveChangesAsync();
 
             return Results.Ok(note.ToResponse());
-        });
+        })
+            .RequireAuthorization("BlockReadonly");;
 
-        group.MapDelete("/{id:int}", async (AppDbContext db, int id) =>
+        group.MapDelete("/{id:int}", async (AppDbContext db, HttpContext context, int id) =>
         {
             var note = await db.RequestNotes.FindAsync(id);
-
             if (note is null)
             {
                 return Results.NotFound($"No request note was found with the provided id: {id}");
+            }
+
+            if (!int.TryParse(context.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out int userId) || userId != note.CreatedByUserId)
+            {
+                return Results.Forbid();
             }
 
             db.RequestNotes.Remove(note);
             await db.SaveChangesAsync();
 
             return Results.NoContent();
-        });
+        })
+            .RequireAuthorization("BlockReadonly");
     }
 }

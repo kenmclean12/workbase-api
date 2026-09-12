@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.DTO.Client;
@@ -75,7 +76,8 @@ public static class ClientService
         await transaction.RollbackAsync();
         throw;
       }
-    });
+    })
+      .RequireAuthorization("AdminOrManager");
 
     group.MapPut("/{id:int}", async (AppDbContext db, ClientUpdateDTO dto, int id) =>
     {
@@ -89,10 +91,16 @@ public static class ClientService
       await db.SaveChangesAsync();
 
       return Results.Ok(client.ToResponse());
-    });
+    })
+      .RequireAuthorization("AdminOrManager");
 
-    group.MapDelete("/{id:int}", async (AppDbContext db, int id) =>
+    group.MapDelete("/{id:int}", async (AppDbContext db, HttpContext context, int id) =>
     {
+      if (int.TryParse(context.User.FindFirstValue("client_id"), out int clientId) && clientId == id)
+      {
+        return Results.Forbid();
+      }
+
       var client = await db.Clients.FirstOrDefaultAsync(c => c.Id == id);
       if (client is null)
       {
@@ -103,6 +111,7 @@ public static class ClientService
       await db.SaveChangesAsync();
 
       return Results.NoContent();
-    });
+    })
+      .RequireAuthorization("AdminOrManager");
   }
 }

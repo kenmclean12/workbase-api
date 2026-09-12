@@ -11,6 +11,4 @@ public class UserInviteBulkCreateDTO
     public UserRole? Role { get; set; }
 
     public int? ClientId { get; set; }
-
-    public int InvitedByUserId { get; set; }
 }

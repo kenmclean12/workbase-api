@@ -106,7 +106,8 @@ public static class UserService
             await db.SaveChangesAsync();
 
             return Results.Ok(existingUser.ToResponse());
-        });
+        })
+            .RequireAuthorization("AdminOrManager");
 
         group.MapDelete("/{id:int}", async (AppDbContext db, int id) =>
         {
@@ -120,6 +121,7 @@ public static class UserService
             await db.SaveChangesAsync();
 
             return Results.NoContent();
-        });
+        })
+            .RequireAuthorization("AdminOrManager");
     }
 }

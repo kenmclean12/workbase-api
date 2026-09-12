@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
@@ -33,8 +35,12 @@ public static class UserInviteService
             return Results.Ok(pendingInvites.Select(ui => ui.ToResponse()).ToArray());
         });
 
-        group.MapPost("/", async (AppDbContext db, UserInviteBulkCreateDTO dto) =>
+        group.MapPost("/", async (AppDbContext db, HttpContext context, UserInviteBulkCreateDTO dto) =>
         {
+            if (!int.TryParse(context.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out int invitedByUserId)) {
+                return Results.Forbid();
+            }
+
             for (int i = 0; i < dto.Emails.Length; i++)
             {
                 byte[] tokenBytes = RandomNumberGenerator.GetBytes(32);
@@ -47,7 +53,7 @@ public static class UserInviteService
                     Role = dto.Role,
                     ClientId = dto.ClientId,
                     TokenHash = tokenHash,
-                    InvitedByUserId = dto.InvitedByUserId,
+                    InvitedByUserId = invitedByUserId,
                 };
 
                 var invite = UserInvite.Create(createDTO);
