@@ -19,6 +19,8 @@ public static class RequestNoteService
             var notes = await db.RequestNotes
                 .Where(n => n.RequestId == requestId)
                 .Include(n => n.CreatedByUser)
+                .OrderByDescending(n => n.CreatedAt)
+                .ThenByDescending(n => n.UpdatedAt)
                 .ToArrayAsync();
 
             return Results.Ok(
