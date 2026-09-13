@@ -105,19 +105,25 @@ public static class SeedData
                 var firstName = firstNames[(i - 1) % firstNames.Length];
                 var lastName = lastNames[(i - 1) % lastNames.Length];
 
-                var role = i % 10 == 0
-                    ? UserRole.SUPERADMIN
-                    : i % 5 == 0
+                // Guarantee:
+                // User 1 = SUPERADMIN with Client 1
+                // User 2 = SUPERADMIN without a Client
+                var role = i switch
+                {
+                    1 or 2 => UserRole.SUPERADMIN,
+                    _ => i % 5 == 0
                         ? UserRole.ADMIN
                         : i % 3 == 0
                             ? UserRole.STANDARD
-                            : UserRole.READONLY;
+                            : UserRole.READONLY,
+                };
 
                 // First 50 users have no client.
-                // Remaining 50 users all belong to Client 1.
-                int? clientId = i <= 50
-                    ? null
-                    : clients[0].Id;
+                // Remaining 50 users belong to Client 1.
+                // Exception: User 1 explicitly belongs to Client 1.
+                int? clientId = i == 1 || i > 50
+                    ? clients[0].Id
+                    : null;
 
                 var user = User.Create(new UserCreateDTO
                 {

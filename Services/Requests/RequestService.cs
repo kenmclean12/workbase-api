@@ -85,7 +85,7 @@ public static class RequestService
 
         group.MapPost("/", async (AppDbContext db, HttpContext context, RequestCreateDTO dto) =>
         {
-            if (!int.TryParse(context.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out int createdByUserId))
+            if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int createdByUserId))
             {
                 return Results.Forbid();
             }
@@ -157,7 +157,7 @@ public static class RequestService
                 return Results.BadRequest($"No values were provided to update request id: {id}");
             }
 
-            if (!int.TryParse(context.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out int actionUserId)) {
+            if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int actionUserId)) {
                 return Results.Forbid();
             }
 

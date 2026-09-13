@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.DTO.RequestNote;
 using newproj.Models.Requests;
+using newproj.Models.Users;
 
 namespace newproj.Services.Requests;
 
@@ -29,7 +30,7 @@ public static class RequestNoteService
 
         group.MapPost("/", async (AppDbContext db, HttpContext context, RequestNoteCreateDTO dto) =>
         {
-            if (!int.TryParse(context.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out int createdByUserId))
+            if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int createdByUserId))
             {
                 return Results.Forbid();
             }
@@ -67,7 +68,7 @@ public static class RequestNoteService
                 return Results.NotFound($"No request note was found with the provided id: {id}");
             }
 
-            if (!int.TryParse(context.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out int userId) || userId != note.CreatedByUserId)
+            if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId) || userId != note.CreatedByUserId)
             {
                 return Results.Forbid();
             }
@@ -87,7 +88,7 @@ public static class RequestNoteService
                 return Results.NotFound($"No request note was found with the provided id: {id}");
             }
 
-            if (!int.TryParse(context.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out int userId) || userId != note.CreatedByUserId)
+            if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId) || userId != note.CreatedByUserId)
             {
                 return Results.Forbid();
             }

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using newproj.Models.Users;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -27,19 +30,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
         ValidateIssuer = false,
         ValidateAudience = false,
         ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
+        ClockSkew = TimeSpan.Zero,
+        RoleClaimType = ClaimTypes.Role
     };
 });
 
-builder.Services.AddAuthorizationBuilder()
-    .AddPolicy("AdminOrManager", policy =>
-        {
-            policy.RequireRole(UserRole.ADMIN.ToString(), UserRole.SUPERADMIN.ToString());
-        })
-    .AddPolicy("BlockReadonly", policy =>
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOrManager", policy =>
+    {
+        policy.RequireRole(UserRole.ADMIN.ToString(), UserRole.SUPERADMIN.ToString());
+    });
+    options.AddPolicy("BlockReadonly", policy =>
     {
         policy.RequireAssertion(context => !context.User.IsInRole(UserRole.READONLY.ToString()));
     });
+});
 
 builder.Services.AddCors(options =>
 {

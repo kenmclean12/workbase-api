@@ -37,7 +37,7 @@ public static class UserInviteService
 
         group.MapPost("/", async (AppDbContext db, HttpContext context, UserInviteBulkCreateDTO dto) =>
         {
-            if (!int.TryParse(context.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out int invitedByUserId)) {
+            if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int invitedByUserId)) {
                 return Results.Forbid();
             }
 

@@ -11,7 +11,7 @@ public static class UserService
 {
     public static void MapUserEndpoints(this WebApplication app)
     {
-        RouteGroupBuilder group = app.MapGroup("/user").RequireAuthorization();
+        RouteGroupBuilder group = app.MapGroup("/user");
 
         group.MapGet("/", async (AppDbContext db) =>
         {
@@ -67,7 +67,7 @@ public static class UserService
 
         group.MapPost("/reset-password", async (AppDbContext db, HttpContext context, UserPasswordResetDTO dto) =>
         {
-            if (!int.TryParse(context.User.FindFirstValue(JwtRegisteredClaimNames.Sub), out int id))
+            if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int id))
             {
                 return Results.Forbid();
             }
