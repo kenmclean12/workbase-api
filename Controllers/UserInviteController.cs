@@ -27,7 +27,7 @@ public class UserInviteController(IUserInviteService userInviteService) : Contro
 
     [HttpPost]
     [Authorize(Policy = "AdminOrManager")]
-    public async Task<IActionResult> Create(HttpContext context, UserInviteBulkCreateDTO dto)
+    public async Task<IActionResult> Create(UserInviteBulkCreateDTO dto)
     {
         if (!int.TryParse(ClaimTypes.NameIdentifier, out int invitedByUserId))
         {
