@@ -9,7 +9,7 @@ public class RequestHistoryService(AppDbContext db) : IRequestHistoryService
 {
     private readonly AppDbContext _db = db;
 
-    public async Task<ICollection<RequestHistoryResponseDTO>> GetByRequestId(int requestId)
+    public async Task<ICollection<RequestHistoryResponseDTO>> FindByRequestId(int requestId)
     {
         ICollection<RequestHistory> history = await _db.RequestHistory
               .Where(rh => rh.RequestId == requestId)
@@ -24,7 +24,7 @@ public class RequestHistoryService(AppDbContext db) : IRequestHistoryService
         return [.. history.Select(h => h.ToResponse())];
     }
 
-    public async Task<ICollection<RequestHistoryResponseDTO>> GetByUserId(int userId)
+    public async Task<ICollection<RequestHistoryResponseDTO>> FindByUserId(int userId)
     {
       ICollection<RequestHistory> historyEntries = await _db.RequestHistory
               .Where(rh => rh.UserId == userId)

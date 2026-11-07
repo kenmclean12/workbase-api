@@ -4,7 +4,7 @@ namespace newproj.Services.RequestHistoryRecords;
 
 public interface IRequestHistoryService
 {
-    Task<ICollection<RequestHistoryResponseDTO>> GetByRequestId(int requestId);
+    Task<ICollection<RequestHistoryResponseDTO>> FindByRequestId(int requestId);
 
-    Task<ICollection<RequestHistoryResponseDTO>> GetByUserId(int userId);
+    Task<ICollection<RequestHistoryResponseDTO>> FindByUserId(int userId);
 }
