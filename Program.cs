@@ -13,6 +13,7 @@ using newproj.Services.Addresses;
 using newproj.Services.Users;
 using newproj.Services.RequestHistoryRecords;
 using newproj.Services.Clients;
+using newproj.Services.RequestNotes;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +67,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
+builder.Services.AddScoped<IRequestNoteService, RequestNoteService>();
 builder.Services.AddScoped<IRequestHistoryService, RequestHistoryService>();
 builder.Services.AddValidation();
 
@@ -92,6 +94,5 @@ app.MapControllers();
 
 app.MapAuthEndpoints();
 app.MapRequestEndpoints();
-app.MapRequestNoteEndpoints();
 app.MapUserInviteEndpoints();
 app.Run();
