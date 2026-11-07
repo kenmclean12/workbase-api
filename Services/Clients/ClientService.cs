@@ -32,7 +32,7 @@ public class ClientService(AppDbContext db) : IClientService
     return client.ToResponse();
   }
 
-  public async Task<ClientResponseDTO?> Create(ClientCreateDTO dto)
+  public async Task<ClientResponseDTO> Create(ClientCreateDTO dto)
   {
     await using var transaction = await _db.Database.BeginTransactionAsync();
     try
@@ -68,7 +68,7 @@ public class ClientService(AppDbContext db) : IClientService
     catch
     {
       await transaction.RollbackAsync();
-      return null;
+      throw;
     }
   }
 

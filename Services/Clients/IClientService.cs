@@ -8,7 +8,7 @@ public interface IClientService
 
     Task<ClientResponseDTO?> FindOne(int id);
 
-    Task<ClientResponseDTO?> Create(ClientCreateDTO dto);
+    Task<ClientResponseDTO> Create(ClientCreateDTO dto);
 
     Task<ClientResponseDTO?> Update(ClientUpdateDTO dto, int id);
     

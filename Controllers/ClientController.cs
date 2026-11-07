@@ -31,8 +31,7 @@ public class ClientController(IClientService clientService) : ControllerBase
     [Authorize(Policy = "AdminOrManager")]
     public async Task<IActionResult> Create(ClientCreateDTO dto)
     {
-        ClientResponseDTO? client = await _clientService.Create(dto);
-        if (client is null) return BadRequest("An error occured while creating the client with the provided data");
+        ClientResponseDTO client = await _clientService.Create(dto);
         return Created($"client/{client.Id}", client);
     }
 

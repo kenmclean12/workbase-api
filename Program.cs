@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.Services.Auth;
-using newproj.Services.Requests;
 using newproj.Services.UserInvites;
 using newProj.Services.Clients;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,6 +13,7 @@ using newproj.Services.Users;
 using newproj.Services.RequestHistoryRecords;
 using newproj.Services.Clients;
 using newproj.Services.RequestNotes;
+using newproj.Services.Requests;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,9 +64,11 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddProblemDetails();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
+builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped<IRequestNoteService, RequestNoteService>();
 builder.Services.AddScoped<IRequestHistoryService, RequestHistoryService>();
 builder.Services.AddValidation();
@@ -90,9 +92,9 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseExceptionHandler();
 app.MapControllers();
 
 app.MapAuthEndpoints();
-app.MapRequestEndpoints();
 app.MapUserInviteEndpoints();
 app.Run();

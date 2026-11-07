@@ -1,204 +1,150 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.DTO.Request;
 using newproj.Helpers.RequestHistoryRecords;
+using newproj.Models.Clients;
 using newproj.Models.Requests;
 using newproj.Models.Users;
 
 namespace newproj.Services.Requests;
 
-public static class RequestService
+public class RequestService(AppDbContext db) : IRequestService
 {
-    public static void MapRequestEndpoints(this WebApplication app)
-    {
-        RouteGroupBuilder group = app.MapGroup("/request").RequireAuthorization();
+    private readonly AppDbContext _db = db;
 
-        group.MapGet("/", async (AppDbContext db) =>
-        {
-            var requests = await db.Requests
+    public async Task<ICollection<RequestResponseDTO>> FindAll()
+    {
+        ICollection<Request> requests = await _db.Requests
                 .Include(r => r.Client)
                 .Include(r => r.CreatedByUser)
+                .OrderByDescending(r => r.UpdatedAt)
+                .ThenByDescending(r => r.CreatedAt)
                 .ToArrayAsync();
 
-            return Results.Ok(
-                requests
-                    .Select(r => r.ToResponse())
-                    .OrderByDescending(r => r.UpdatedAt)
-                    .ThenByDescending(r => r.CreatedAt)
-                    .ToArray()
-            );
-        });
 
-        group.MapGet("/{id:int}", async (AppDbContext db, int id) =>
-        {
-            var request = await db.Requests
+        return [.. requests.Select(r => r.ToResponse())];
+    }
+
+    public async Task<RequestResponseDTO?> FindOne(int id)
+    {
+        Request? request = await _db.Requests
                 .Include(r => r.Client)
                 .Include(r => r.CreatedByUser)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
-            if (request is null)
-            {
-                return Results.NotFound($"No request was found with the provided id: {id}");
-            }
+        if (request is null) return null;
 
-            return Results.Ok(request.ToResponse());
-        });
+        return request.ToResponse();
+    }
 
-        group.MapGet("/client/{clientId:int}", async (AppDbContext db, int clientId) =>
-        {
-            var requests = await db.Requests
+    public async Task<ICollection<RequestResponseDTO>> FindByClientId(int clientId)
+    {
+        ICollection<Request> requests = await _db.Requests
               .Where(r => r.ClientId == clientId)
               .Include(r => r.Client)
               .Include(r => r.CreatedByUser)
+              .OrderByDescending(r => r.UpdatedAt)
+                  .ThenByDescending(r => r.CreatedAt)
               .ToArrayAsync();
 
-            return Results.Ok(
-                requests
-                  .Select(r => r.ToResponse())
-                  .OrderByDescending(r => r.UpdatedAt)
-                  .ThenByDescending(r => r.CreatedAt)
-                  .ToArray()
-            );
-        });
+        return [.. requests.Select(r => r.ToResponse())];
+    }
 
-        group.MapGet("/user/{userId:int}", async (AppDbContext db, int userId) =>
-        {
-            var requests = await db.Requests
+    public async Task<ICollection<RequestResponseDTO>> FindByUserId(int userId)
+    {
+        ICollection<Request> requests = await _db.Requests
               .Where(r => r.AssignedToUserId == userId)
               .Include(r => r.Client)
               .Include(r => r.CreatedByUser)
+              .OrderByDescending(r => r.UpdatedAt)
+              .ThenByDescending(r => r.CreatedAt)
               .ToArrayAsync();
 
-            return Results.Ok(
-                requests
-                  .Select(r => r.ToResponse())
-                  .OrderByDescending(r => r.UpdatedAt)
-                  .ThenByDescending(r => r.CreatedAt)
-                  .ToArray()
+        return [.. requests.Select(r => r.ToResponse())];
+    }
+
+    public async Task<RequestCreateResult> Create(RequestCreateDTO dto, int createdByUserId)
+    {
+        User? createdByUser = await _db.Users.FindAsync(createdByUserId);
+        if (createdByUser is null) return RequestCreateResult.UserNotFound;
+
+        Client? client = await _db.Clients.FindAsync(dto.ClientId);
+        if (client is null) return RequestCreateResult.ClientNotFound;
+
+        await using var transaction = await _db.Database.BeginTransactionAsync();
+
+        try
+        {
+            Request request = Request.Create(dto, createdByUserId);
+            _db.Requests.Add(request);
+            await _db.SaveChangesAsync();
+
+            RequestHistoryHelpers.CreateRequestHistory(
+                _db,
+                request.Id,
+                request.CreatedByUserId,
+                $"Request was created by {createdByUser.FirstName} {createdByUser.LastName}"
             );
-        });
 
-        group.MapPost("/", async (AppDbContext db, HttpContext context, RequestCreateDTO dto) =>
+            await _db.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            request.Client = client;
+            request.CreatedByUser = createdByUser;
+            return RequestCreateResult.Success;
+        }
+        catch
         {
-            if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int createdByUserId))
-            {
-                return Results.Forbid();
-            }
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
 
-            if (!int.TryParse(context.User.FindFirstValue("client_id"), out int requestUserClientId) || requestUserClientId != dto.ClientId)
-            {
-                return Results.Forbid();
-            }
+    public async Task<RequestUpdateResult> Update(RequestUpdateDTO dto, int id, int actionUserId)
+    {
+        Request? request = await _db.Requests
+            .Include(r => r.Client)
+            .Include(r => r.CreatedByUser)
+            .FirstOrDefaultAsync(r => r.Id == id);
 
-            var createdByUser = await db.Users.FindAsync(createdByUserId);
-            if (createdByUser is null)
-            {
-                return Results.NotFound($"No user was found with the provided creating user id: {createdByUserId}");
-            }
+        if (request is null) return RequestUpdateResult.RequestNotFound;
 
-            var client = await db.Clients.FindAsync(dto.ClientId);
-            if (client is null)
-            {
-                return Results.NotFound($"No client was found with the provided client id: {dto.ClientId}");
-            }
+        User? actionUser = await _db.Users.FindAsync(actionUserId);
+        if (actionUser is null) return RequestUpdateResult.ActionUserNotFound;
 
-            await using var transaction = await db.Database.BeginTransactionAsync();
-
-            try
-            {
-                Request request = Request.Create(dto, createdByUserId);
-                db.Requests.Add(request);
-                await db.SaveChangesAsync();
-
-                RequestHistoryHelpers.CreateRequestHistory(
-                    db,
-                    request.Id,
-                    request.CreatedByUserId,
-                    $"Request was created by {createdByUser.FirstName} {createdByUser.LastName}"
-                );
-
-                await db.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                request.Client = client;
-                request.CreatedByUser = createdByUser;
-                return Results.Created($"/request/{request.Id}", request.ToResponse());
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
-        })
-            .RequireAuthorization("BlockReadonly");
-
-        group.MapPatch("/{id:int}", async (AppDbContext db, HttpContext context, RequestUpdateDTO dto, int id) =>
+        User? assignedUser = null;
+        if (dto.AssignedToUserId is not null)
         {
-            var request = await db.Requests
-                .Include(r => r.Client)
-                .Include(r => r.CreatedByUser)
-                .FirstOrDefaultAsync(r => r.Id == id);
-
-            if (request is null)
+            assignedUser = await _db.Users.FindAsync(dto.AssignedToUserId);
+            if (assignedUser is null)
             {
-                return Results.NotFound($"No request was found with the provided id: {id}");
+                return RequestUpdateResult.AssignedUserNotFound;
             }
+        }
 
-            if (
-                dto.AssignedToUserId is null &&
-                dto.Status is null
-            )
-            {
-                return Results.BadRequest($"No values were provided to update request id: {id}");
-            }
+        await using var transaction = await _db.Database.BeginTransactionAsync();
 
-            if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int actionUserId)) {
-                return Results.Forbid();
-            }
+        try
+        {
+            request.Update(dto);
 
-            User? user = await db.Users.FindAsync(actionUserId);
-            if (user is null)
-            {
-                return Results.BadRequest($"No user was found with the provided action user id: {actionUserId}");
-            }
+            RequestHistoryHelpers.CreateRequestUpdateHistory(
+                _db,
+                request.Id,
+                actionUser,
+                assignedUser,
+                dto.Status
+            );
 
-            User? assignedUser = null;
-            if (dto.AssignedToUserId is not null)
-            {
-                assignedUser = await db.Users.FindAsync(dto.AssignedToUserId);
-                if (assignedUser is null)
-                {
-                    return Results.BadRequest($"No user was found with the provided assigned user id: {dto.AssignedToUserId}");
-                }
-            }
+            await _db.SaveChangesAsync();
+            await transaction.CommitAsync();
 
-            await using var transaction = await db.Database.BeginTransactionAsync();
-
-            try
-            {
-                request.Update(dto);
-
-                RequestHistoryHelpers.CreateRequestUpdateHistory(
-                    db,
-                    request.Id,
-                    user,
-                    assignedUser,
-                    dto.Status
-                );
-
-                await db.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return Results.Ok(request.ToResponse());
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
-        })
-            .RequireAuthorization("BlockReadonly");
+            return RequestUpdateResult.Success;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 }
