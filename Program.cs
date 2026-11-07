@@ -11,6 +11,7 @@ using newproj.Models.Users;
 using System.Security.Claims;
 using newproj.Services.Addresses;
 using newproj.Services.Users;
+using newproj.Services.RequestHistoryRecords;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +64,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRequestHistoryService, RequestHistoryService>();
 builder.Services.AddValidation();
 
 var app = builder.Build();
@@ -90,6 +92,5 @@ app.MapAuthEndpoints();
 app.MapClientEndpoints();
 app.MapRequestEndpoints();
 app.MapRequestNoteEndpoints();
-app.MapRequestHistoryEndpoints();
 app.MapUserInviteEndpoints();
 app.Run();
