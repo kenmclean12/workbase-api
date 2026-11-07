@@ -34,7 +34,7 @@ public class AuthService(AppDbContext db, IConfiguration configuration) : IAuthS
 
         string accessToken = AuthHelpers.CreateToken(_config, user);
 
-        TokenResponseDTO responseDTO = new() { Token = accessToken, RefreshToken = refreshTokenResult.Token };
+        TokenResponseDTO responseDTO = new(accessToken, refreshTokenResult.Token);
         return new LoginResult(null, responseDTO);
     }
 
@@ -146,12 +146,7 @@ public class AuthService(AppDbContext db, IConfiguration configuration) : IAuthS
             await _db.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            TokenResponseDTO responseDTO = new()
-            {
-                Token = accessToken,
-                RefreshToken = newRefreshTokenResult.Token,
-            };
-
+            TokenResponseDTO responseDTO = new(accessToken, newRefreshTokenResult.Token);
             return new RefreshAccessTokenResult(null, responseDTO);
         }
         catch
