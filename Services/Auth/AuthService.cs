@@ -10,194 +10,377 @@ using newproj.Models.Users;
 
 namespace newproj.Services.Auth;
 
-public static class AuthService
+// public static class AuthService
+// {
+//     public static void MapAuthEndpoints(this WebApplication app)
+//     {
+//         var group = app.MapGroup("/auth");
+
+//         group.MapPost("/login", async (AppDbContext db, LoginDTO dto) =>
+//         {
+//             User? user = await db.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+//             if (user is null)
+//             {
+//                 return Results.Unauthorized();
+//             }
+
+//             if (!user.VerifyPassword(dto.Password))
+//             {
+//                 return Results.Unauthorized();
+//             }
+
+//             RefreshTokenResult refreshTokenResult = AuthHelpers.CreateRefreshToken();
+//             RefreshTokenCreateDTO refreshTokenCreateDTO = new()
+//             {
+//                 UserId = user.Id,
+//                 TokenHash = refreshTokenResult.TokenHash,
+//                 ExpiresAt = DateTime.UtcNow.AddMonths(1)
+//             };
+
+//             RefreshToken refreshToken = RefreshToken.Create(refreshTokenCreateDTO);
+//             db.RefreshTokens.Add(refreshToken);
+//             await db.SaveChangesAsync();
+
+//             string accessToken = AuthHelpers.CreateToken(app.Configuration, user);
+
+//             TokenResponseDTO responseDTO = new() { Token = accessToken, RefreshToken = refreshTokenResult.Token };
+//             return Results.Ok(responseDTO);
+//         });
+
+//         group.MapPost("/register", async (AppDbContext db, RegisterDTO dto) =>
+//         {
+//             byte[] tokenBytes;
+//             try
+//             {
+//                 tokenBytes = Convert.FromBase64String(dto.InviteToken);
+//             }
+//             catch (FormatException)
+//             {
+//                 return Results.Unauthorized();
+//             }
+
+//             string tokenHash = Convert.ToBase64String(SHA256.HashData(tokenBytes));
+
+//             UserInvite? invite = await db.UserInvites.FirstOrDefaultAsync(ui =>
+//                     ui.TokenHash == tokenHash &&
+//                     ui.Email == dto.Email &&
+//                     ui.ExpiresAt > DateTime.UtcNow &&
+//                     ui.AcceptedAt == null
+//                 );
+
+//             if (invite is null)
+//             {
+//                 return Results.Unauthorized();
+//             }
+
+//             await using var transaction = await db.Database.BeginTransactionAsync();
+
+//             try
+//             {
+//                 invite.AcceptedAt = DateTime.UtcNow;
+
+//                 UserCreateDTO userCreateDTO = new()
+//                 {
+//                     FirstName = dto.FirstName,
+//                     LastName = dto.LastName,
+//                     Email = invite.Email,
+//                     Role = invite.Role,
+//                     ClientId = invite.ClientId,
+//                     Password = dto.Password,
+//                 };
+
+//                 User newUser = User.Create(userCreateDTO);
+//                 db.Users.Add(newUser);
+
+//                 await db.SaveChangesAsync();
+//                 await transaction.CommitAsync();
+
+//                 return Results.Ok(newUser.ToResponse());
+//             }
+//             catch
+//             {
+//                 await transaction.RollbackAsync();
+//                 throw;
+//             }
+//         });
+
+//         group.MapPost("/refresh-token", async (AppDbContext db, RefreshTokenDTO dto) =>
+//         {
+//             byte[] tokenBytes;
+//             try
+//             {
+//                 tokenBytes = Convert.FromBase64String(dto.RefreshToken);
+//             }
+//             catch (FormatException)
+//             {
+//                 return Results.Unauthorized();
+//             }
+
+//             string tokenHash = Convert.ToBase64String(SHA256.HashData(tokenBytes));
+
+//             RefreshToken? refreshToken = await db.RefreshTokens.FirstOrDefaultAsync(rt =>
+//               rt.ExpiresAt > DateTime.UtcNow &&
+//               rt.RevokedAt == null &&
+//               rt.TokenHash == tokenHash
+//             );
+
+//             if (refreshToken is null)
+//             {
+//                 return Results.Unauthorized();
+//             }
+
+//             User? user = await db.Users.FindAsync(refreshToken.UserId);
+//             if (user is null)
+//             {
+//                 return Results.Unauthorized();
+//             }
+
+//             await using var transaction = await db.Database.BeginTransactionAsync();
+//             try
+//             {
+//                 string accessToken = AuthHelpers.CreateToken(app.Configuration, user);
+//                 refreshToken.RevokedAt = DateTime.UtcNow;
+
+//                 RefreshTokenResult newRefreshTokenResult = AuthHelpers.CreateRefreshToken();
+//                 RefreshTokenCreateDTO newRefreshTokenCreateDTO = new()
+//                 {
+//                     UserId = user.Id,
+//                     TokenHash = newRefreshTokenResult.TokenHash,
+//                     ExpiresAt = DateTime.UtcNow.AddMonths(1)
+//                 };
+
+//                 RefreshToken newRefreshToken = RefreshToken.Create(newRefreshTokenCreateDTO);
+//                 db.RefreshTokens.Add(newRefreshToken);
+
+//                 await db.SaveChangesAsync();
+//                 await transaction.CommitAsync();
+
+//                 TokenResponseDTO responseDTO = new()
+//                 {
+//                     Token = accessToken,
+//                     RefreshToken = newRefreshTokenResult.Token,
+//                 };
+
+//                 return Results.Ok(responseDTO);
+//             }
+//             catch
+//             {
+//                 await transaction.RollbackAsync();
+//                 throw;
+//             }
+//         });
+
+//         group.MapPost("/logout", async (AppDbContext db, RefreshTokenDTO dto) =>
+//         {
+//             byte[] tokenBytes;
+//             try
+//             {
+//                 tokenBytes = Convert.FromBase64String(dto.RefreshToken);
+//             }
+//             catch (FormatException)
+//             {
+//                 return Results.Unauthorized();
+//             }
+
+//             string tokenHash = Convert.ToBase64String(SHA256.HashData(tokenBytes));
+
+//             RefreshToken? refreshToken = await db.RefreshTokens.FirstOrDefaultAsync(rt =>
+//                 rt.TokenHash == tokenHash &&
+//                 rt.RevokedAt == null
+//             );
+
+//             if (refreshToken is null)
+//             {
+//                 return Results.NoContent();
+//             }
+
+//             refreshToken.RevokedAt = DateTime.UtcNow;
+//             await db.SaveChangesAsync();
+
+//             return Results.NoContent();
+//         });
+//     }
+// }
+
+public class AuthService(AppDbContext db, WebApplication app) : IAuthService
 {
-    public static void MapAuthEndpoints(this WebApplication app)
+    private readonly AppDbContext _db = db;
+    private readonly WebApplication _app = app;
+
+    public async Task<LoginResult> Login(LoginDTO dto)
     {
-        var group = app.MapGroup("/auth");
+        User? user = await _db.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+        if (user is null) return new LoginResult(LoginFailure.UserNotFound, null);
+        if (!user.VerifyPassword(dto.Password)) return new LoginResult(LoginFailure.WrongPassword, null);
 
-        group.MapPost("/login", async (AppDbContext db, LoginDTO dto) =>
+        RefreshTokenResult refreshTokenResult = AuthHelpers.CreateRefreshToken();
+        RefreshTokenCreateDTO refreshTokenCreateDTO = new()
         {
-            User? user = await db.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
-            if (user is null)
-            {
-                return Results.Unauthorized();
-            }
+            UserId = user.Id,
+            TokenHash = refreshTokenResult.TokenHash,
+            ExpiresAt = DateTime.UtcNow.AddMonths(1)
+        };
 
-            if (!user.VerifyPassword(dto.Password))
-            {
-                return Results.Unauthorized();
-            }
+        RefreshToken refreshToken = RefreshToken.Create(refreshTokenCreateDTO);
+        _db.RefreshTokens.Add(refreshToken);
+        await _db.SaveChangesAsync();
 
-            RefreshTokenResult refreshTokenResult = AuthHelpers.CreateRefreshToken();
-            RefreshTokenCreateDTO refreshTokenCreateDTO = new()
+        string accessToken = AuthHelpers.CreateToken(_app.Configuration, user);
+
+        TokenResponseDTO responseDTO = new() { Token = accessToken, RefreshToken = refreshTokenResult.Token };
+        return new LoginResult(null, responseDTO);
+    }
+
+    public async Task<RegisterResult> Register(RegisterDTO dto)
+    {
+        byte[] tokenBytes;
+        try
+        {
+            tokenBytes = Convert.FromBase64String(dto.InviteToken);
+        }
+        catch (FormatException)
+        {
+            return new RegisterResult(RegisterFailure.InvalidToken, null);
+        }
+
+        string tokenHash = Convert.ToBase64String(SHA256.HashData(tokenBytes));
+
+        UserInvite? invite = await _db.UserInvites.FirstOrDefaultAsync(ui =>
+                ui.TokenHash == tokenHash &&
+                ui.Email == dto.Email &&
+                ui.ExpiresAt > DateTime.UtcNow &&
+                ui.AcceptedAt == null
+            );
+
+        if (invite is null)
+        {
+            return new RegisterResult(RegisterFailure.InviteNotFound, null);
+        }
+
+        await using var transaction = await _db.Database.BeginTransactionAsync();
+
+        try
+        {
+            invite.AcceptedAt = DateTime.UtcNow;
+
+            UserCreateDTO userCreateDTO = new()
+            {
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Email = invite.Email,
+                Role = invite.Role,
+                ClientId = invite.ClientId,
+                Password = dto.Password,
+            };
+
+            User newUser = User.Create(userCreateDTO);
+            _db.Users.Add(newUser);
+
+            await _db.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return new RegisterResult(null, newUser.ToResponse());
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    public async Task<RefreshAccessTokenResult> RefreshAccessToken(RefreshTokenDTO dto)
+    {
+        byte[] tokenBytes;
+        try
+        {
+            tokenBytes = Convert.FromBase64String(dto.RefreshToken);
+        }
+        catch (FormatException)
+        {
+            return new RefreshAccessTokenResult(RefreshAccessTokenFailure.InvalidToken, null);
+        }
+
+        string tokenHash = Convert.ToBase64String(SHA256.HashData(tokenBytes));
+
+        RefreshToken? refreshToken = await _db.RefreshTokens.FirstOrDefaultAsync(rt =>
+          rt.ExpiresAt > DateTime.UtcNow &&
+          rt.RevokedAt == null &&
+          rt.TokenHash == tokenHash
+        );
+
+        if (refreshToken is null)
+        {
+            return new RefreshAccessTokenResult(RefreshAccessTokenFailure.RefreshTokenNotFound, null);
+        }
+
+        User? user = await _db.Users.FindAsync(refreshToken.UserId);
+        if (user is null)
+        {
+            return new RefreshAccessTokenResult(RefreshAccessTokenFailure.UserNotFound, null);
+        }
+
+        await using var transaction = await _db.Database.BeginTransactionAsync();
+        try
+        {
+            string accessToken = AuthHelpers.CreateToken(_app.Configuration, user);
+            refreshToken.RevokedAt = DateTime.UtcNow;
+
+            RefreshTokenResult newRefreshTokenResult = AuthHelpers.CreateRefreshToken();
+            RefreshTokenCreateDTO newRefreshTokenCreateDTO = new()
             {
                 UserId = user.Id,
-                TokenHash = refreshTokenResult.TokenHash,
+                TokenHash = newRefreshTokenResult.TokenHash,
                 ExpiresAt = DateTime.UtcNow.AddMonths(1)
             };
 
-            RefreshToken refreshToken = RefreshToken.Create(refreshTokenCreateDTO);
-            db.RefreshTokens.Add(refreshToken);
-            await db.SaveChangesAsync();
+            RefreshToken newRefreshToken = RefreshToken.Create(newRefreshTokenCreateDTO);
+            _db.RefreshTokens.Add(newRefreshToken);
 
-            string accessToken = AuthHelpers.CreateToken(app.Configuration, user);
+            await _db.SaveChangesAsync();
+            await transaction.CommitAsync();
 
-            TokenResponseDTO responseDTO = new() { Token = accessToken, RefreshToken = refreshTokenResult.Token };
-            return Results.Ok(responseDTO);
-        });
+            TokenResponseDTO responseDTO = new()
+            {
+                Token = accessToken,
+                RefreshToken = newRefreshTokenResult.Token,
+            };
 
-        group.MapPost("/register", async (AppDbContext db, RegisterDTO dto) =>
+            return new RefreshAccessTokenResult(null, responseDTO);
+        }
+        catch
         {
-            byte[] tokenBytes;
-            try
-            {
-                tokenBytes = Convert.FromBase64String(dto.InviteToken);
-            }
-            catch (FormatException)
-            {
-                return Results.Unauthorized();
-            }
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
 
-            string tokenHash = Convert.ToBase64String(SHA256.HashData(tokenBytes));
-
-            UserInvite? invite = await db.UserInvites.FirstOrDefaultAsync(ui =>
-                    ui.TokenHash == tokenHash &&
-                    ui.Email == dto.Email &&
-                    ui.ExpiresAt > DateTime.UtcNow &&
-                    ui.AcceptedAt == null
-                );
-
-            if (invite is null)
-            {
-                return Results.Unauthorized();
-            }
-
-            await using var transaction = await db.Database.BeginTransactionAsync();
-
-            try
-            {
-                invite.AcceptedAt = DateTime.UtcNow;
-
-                UserCreateDTO userCreateDTO = new()
-                {
-                    FirstName = dto.FirstName,
-                    LastName = dto.LastName,
-                    Email = invite.Email,
-                    Role = invite.Role,
-                    ClientId = invite.ClientId,
-                    Password = dto.Password,
-                };
-
-                User newUser = User.Create(userCreateDTO);
-                db.Users.Add(newUser);
-
-                await db.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return Results.Ok(newUser.ToResponse());
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
-        });
-
-        group.MapPost("/refresh-token", async (AppDbContext db, RefreshTokenDTO dto) =>
+    public async Task<LogoutResult> Logout(RefreshTokenDTO dto)
+    {
+        byte[] tokenBytes;
+        try
         {
-            byte[] tokenBytes;
-            try
-            {
-                tokenBytes = Convert.FromBase64String(dto.RefreshToken);
-            }
-            catch (FormatException)
-            {
-                return Results.Unauthorized();
-            }
-
-            string tokenHash = Convert.ToBase64String(SHA256.HashData(tokenBytes));
-
-            RefreshToken? refreshToken = await db.RefreshTokens.FirstOrDefaultAsync(rt =>
-              rt.ExpiresAt > DateTime.UtcNow &&
-              rt.RevokedAt == null &&
-              rt.TokenHash == tokenHash
-            );
-
-            if (refreshToken is null)
-            {
-                return Results.Unauthorized();
-            }
-
-            User? user = await db.Users.FindAsync(refreshToken.UserId);
-            if (user is null)
-            {
-                return Results.Unauthorized();
-            }
-
-            await using var transaction = await db.Database.BeginTransactionAsync();
-            try
-            {
-                string accessToken = AuthHelpers.CreateToken(app.Configuration, user);
-                refreshToken.RevokedAt = DateTime.UtcNow;
-
-                RefreshTokenResult newRefreshTokenResult = AuthHelpers.CreateRefreshToken();
-                RefreshTokenCreateDTO newRefreshTokenCreateDTO = new()
-                {
-                    UserId = user.Id,
-                    TokenHash = newRefreshTokenResult.TokenHash,
-                    ExpiresAt = DateTime.UtcNow.AddMonths(1)
-                };
-
-                RefreshToken newRefreshToken = RefreshToken.Create(newRefreshTokenCreateDTO);
-                db.RefreshTokens.Add(newRefreshToken);
-
-                await db.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                TokenResponseDTO responseDTO = new()
-                {
-                    Token = accessToken,
-                    RefreshToken = newRefreshTokenResult.Token,
-                };
-
-                return Results.Ok(responseDTO);
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
-        });
-
-        group.MapPost("/logout", async (AppDbContext db, RefreshTokenDTO dto) =>
+            tokenBytes = Convert.FromBase64String(dto.RefreshToken);
+        }
+        catch (FormatException)
         {
-            byte[] tokenBytes;
-            try
-            {
-                tokenBytes = Convert.FromBase64String(dto.RefreshToken);
-            }
-            catch (FormatException)
-            {
-                return Results.Unauthorized();
-            }
+            return LogoutResult.InvalidToken;
+        }
 
-            string tokenHash = Convert.ToBase64String(SHA256.HashData(tokenBytes));
+        string tokenHash = Convert.ToBase64String(SHA256.HashData(tokenBytes));
 
-            RefreshToken? refreshToken = await db.RefreshTokens.FirstOrDefaultAsync(rt =>
-                rt.TokenHash == tokenHash &&
-                rt.RevokedAt == null
-            );
+        RefreshToken? refreshToken = await _db.RefreshTokens.FirstOrDefaultAsync(rt =>
+            rt.TokenHash == tokenHash &&
+            rt.RevokedAt == null
+        );
 
-            if (refreshToken is null)
-            {
-                return Results.NoContent();
-            }
+        if (refreshToken is null)
+        {
+            return LogoutResult.RefreshTokenNotFound;
+        }
 
-            refreshToken.RevokedAt = DateTime.UtcNow;
-            await db.SaveChangesAsync();
+        refreshToken.RevokedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
 
-            return Results.NoContent();
-        });
+        return LogoutResult.Success;
     }
 }

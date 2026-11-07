@@ -65,6 +65,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddProblemDetails();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserInviteService, UserInviteService>();
 builder.Services.AddScoped<IClientService, ClientService>();
@@ -96,5 +97,4 @@ app.UseAuthorization();
 app.UseExceptionHandler();
 app.MapControllers();
 
-app.MapAuthEndpoints();
 app.Run();
