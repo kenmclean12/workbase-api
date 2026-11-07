@@ -1,41 +1,32 @@
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.DTO.Address;
+using newproj.Models.Addresses;
 
 namespace newproj.Services.Addresses;
 
-public static class AddressService
+public class AddressService(AppDbContext db) : IAddressService
 {
-    public static void MapAddressEndpoints(this WebApplication app)
+    private readonly AppDbContext _db = db;
+    public async Task<AddressResponseDTO?> Update(AddressUpdateDTO dto, int clientId)
     {
-        RouteGroupBuilder group = app.MapGroup("/address").RequireAuthorization();
+        Address? address = await _db.Addresses.FirstOrDefaultAsync(a => a.ClientId == clientId);
+        if (address is null) return null;
 
-        group.MapPut("/{clientId:int}", async (AppDbContext db, AddressUpdateDTO dto, int clientId) =>
-        {            
-            var address = await db.Addresses.FirstOrDefaultAsync(a => a.ClientId == clientId);
-            if (address is null)
-            {
-                return Results.NotFound($"No address was found with the provided client id: {clientId}");
-            }
+        address.Update(dto);
+        await _db.SaveChangesAsync();
 
-            address.Update(dto);
-            await db.SaveChangesAsync();
-            return Results.Ok(address.ToResponse());
-        })
-            .RequireAuthorization("AdminOrManager");
+        return address.ToResponse();
+    }
 
-        group.MapDelete("/{clientId:int}", async (AppDbContext db, int clientId) =>
-        {
-            var address = await db.Addresses.FirstOrDefaultAsync(a => a.ClientId == clientId);
-            if (address is null)
-            {
-                return Results.NotFound($"No address was found with the provided client id: {clientId}");
-            }
+    public async Task<bool> Delete(int clientId)
+    {
+        Address? address = await _db.Addresses.FirstOrDefaultAsync(a => a.ClientId == clientId);
+        if (address is null) return false;
 
-            db.Addresses.Remove(address);
-            await db.SaveChangesAsync();
-            return Results.NoContent();
-        })
-            .RequireAuthorization("AdminOrManager");
+        _db.Addresses.Remove(address);
+        await _db.SaveChangesAsync();
+
+        return true;
     }
 }

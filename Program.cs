@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
-using newproj.Services.Addresses;
 using newproj.Services.Auth;
 using newproj.Services.Requests;
 using newproj.Services.UserInvites;
@@ -11,8 +10,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using newproj.Models.Users;
 using System.Security.Claims;
+using newproj.Services.Addresses;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -57,6 +59,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddValidation();
 
 var app = builder.Build();
@@ -75,7 +78,6 @@ app.UseAuthorization();
 
 app.MapAuthEndpoints();
 app.MapUserEndpoints();
-app.MapAddressEndpoints();
 app.MapClientEndpoints();
 app.MapRequestEndpoints();
 app.MapRequestNoteEndpoints();
