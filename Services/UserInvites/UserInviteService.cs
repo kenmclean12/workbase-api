@@ -7,76 +7,137 @@ using newproj.Models.UserInvites;
 
 namespace newproj.Services.UserInvites;
 
-public static class UserInviteService
-{
-    public static void MapUserInviteEndpoints(this WebApplication app)
-    {
-        RouteGroupBuilder group = app.MapGroup("/user-invites").RequireAuthorization();
+// public static class UserInviteService
+// {
+//     public static void MapUserInviteEndpoints(this WebApplication app)
+//     {
+//         RouteGroupBuilder group = app.MapGroup("/user-invites").RequireAuthorization();
 
-        group.MapGet("/pending", async (AppDbContext db) =>
-        {
-            var pendingInvites = await db.UserInvites
+//         group.MapGet("/pending", async (AppDbContext db) =>
+//         {
+//             var pendingInvites = await db.UserInvites
+//                 .Where(ui => ui.ClientId == null && ui.AcceptedAt == null)
+//                 .Include(ui => ui.InvitedByUser)
+//                 .ToArrayAsync();
+
+//             return Results.Ok(pendingInvites.Select(ui => ui.ToResponse()).ToArray());
+//         });
+
+//         group.MapGet("/client/{clientId:int}/pending", async (AppDbContext db, int clientId) =>
+//         {
+//             var pendingInvites = await db.UserInvites
+//                 .Where(ui => ui.ClientId == clientId && ui.AcceptedAt == null)
+//                 .Include(ui => ui.Client)
+//                 .Include(ui => ui.InvitedByUser)
+//                 .ToArrayAsync();
+
+//             return Results.Ok(pendingInvites.Select(ui => ui.ToResponse()).ToArray());
+//         });
+
+//         group.MapPost("/", async (AppDbContext db, HttpContext context, UserInviteBulkCreateDTO dto) =>
+//         {
+//             if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int invitedByUserId)) {
+//                 return Results.Forbid();
+//             }
+
+//             for (int i = 0; i < dto.Emails.Length; i++)
+//             {
+//                 byte[] tokenBytes = RandomNumberGenerator.GetBytes(32);
+//                 string token = Convert.ToBase64String(tokenBytes);
+//                 string tokenHash = Convert.ToBase64String(SHA256.HashData(tokenBytes));
+
+//                 var createDTO = new UserInviteCreateDTO
+//                 {
+//                     Email = dto.Emails[i],
+//                     Role = dto.Role,
+//                     ClientId = dto.ClientId,
+//                     TokenHash = tokenHash,
+//                     InvitedByUserId = invitedByUserId,
+//                 };
+
+//                 var invite = UserInvite.Create(createDTO);
+//                 db.UserInvites.Add(invite);
+//             }
+
+//             await db.SaveChangesAsync();
+//             return Results.NoContent();
+//         })
+//             .RequireAuthorization("AdminOrManager");
+
+//         group.MapDelete("/{id:int}", async (AppDbContext db, int id) =>
+//         {
+//             var invite = await db.UserInvites.FindAsync(id);
+//             if (invite is null)
+//             {
+//                 return Results.NotFound($"No invite was found with the provided id: {id}");
+//             }
+
+//             db.UserInvites.Remove(invite);
+//             await db.SaveChangesAsync();
+
+//             return Results.NoContent();
+//         })
+//             .RequireAuthorization("AdminOrManager");
+//     }
+// }
+
+public class UserInviteService(AppDbContext db) : IUserInviteService
+{
+    private readonly AppDbContext _db = db;
+
+    public async Task<ICollection<UserInviteResponseDTO>> FindPending()
+    {
+        ICollection<UserInvite> pendingInvites = await _db.UserInvites
                 .Where(ui => ui.ClientId == null && ui.AcceptedAt == null)
                 .Include(ui => ui.InvitedByUser)
                 .ToArrayAsync();
 
-            return Results.Ok(pendingInvites.Select(ui => ui.ToResponse()).ToArray());
-        });
+        return [.. pendingInvites.Select(ui => ui.ToResponse())];
+    }
 
-        group.MapGet("/client/{clientId:int}/pending", async (AppDbContext db, int clientId) =>
-        {
-            var pendingInvites = await db.UserInvites
+    public async Task<ICollection<UserInviteResponseDTO>> FindPendingByClientId(int clientId)
+    {
+        ICollection<UserInvite> pendingInvites = await _db.UserInvites
                 .Where(ui => ui.ClientId == clientId && ui.AcceptedAt == null)
                 .Include(ui => ui.Client)
                 .Include(ui => ui.InvitedByUser)
                 .ToArrayAsync();
 
-            return Results.Ok(pendingInvites.Select(ui => ui.ToResponse()).ToArray());
-        });
+        return [.. pendingInvites.Select(ui => ui.ToResponse()).ToArray()];
+    }
 
-        group.MapPost("/", async (AppDbContext db, HttpContext context, UserInviteBulkCreateDTO dto) =>
+    public async Task<bool> Create(UserInviteBulkCreateDTO dto, int invitedByUserId)
+    {
+        for (int i = 0; i < dto.Emails.Length; i++)
         {
-            if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int invitedByUserId)) {
-                return Results.Forbid();
-            }
+            byte[] tokenBytes = RandomNumberGenerator.GetBytes(32);
+            string tokenHash = Convert.ToBase64String(SHA256.HashData(tokenBytes));
 
-            for (int i = 0; i < dto.Emails.Length; i++)
+            var createDTO = new UserInviteCreateDTO
             {
-                byte[] tokenBytes = RandomNumberGenerator.GetBytes(32);
-                string token = Convert.ToBase64String(tokenBytes);
-                string tokenHash = Convert.ToBase64String(SHA256.HashData(tokenBytes));
+                Email = dto.Emails[i],
+                Role = dto.Role,
+                ClientId = dto.ClientId,
+                TokenHash = tokenHash,
+                InvitedByUserId = invitedByUserId,
+            };
 
-                var createDTO = new UserInviteCreateDTO
-                {
-                    Email = dto.Emails[i],
-                    Role = dto.Role,
-                    ClientId = dto.ClientId,
-                    TokenHash = tokenHash,
-                    InvitedByUserId = invitedByUserId,
-                };
+            var invite = UserInvite.Create(createDTO);
+            _db.UserInvites.Add(invite);
+        }
 
-                var invite = UserInvite.Create(createDTO);
-                db.UserInvites.Add(invite);
-            }
+        await _db.SaveChangesAsync();
+        return true;
+    }
 
-            await db.SaveChangesAsync();
-            return Results.NoContent();
-        })
-            .RequireAuthorization("AdminOrManager");
+    public async Task<bool> Delete(int id)
+    {
+        var invite = await _db.UserInvites.FindAsync(id);
+        if (invite is null) return false;
 
-        group.MapDelete("/{id:int}", async (AppDbContext db, int id) =>
-        {
-            var invite = await db.UserInvites.FindAsync(id);
-            if (invite is null)
-            {
-                return Results.NotFound($"No invite was found with the provided id: {id}");
-            }
+        _db.UserInvites.Remove(invite);
+        await _db.SaveChangesAsync();
 
-            db.UserInvites.Remove(invite);
-            await db.SaveChangesAsync();
-
-            return Results.NoContent();
-        })
-            .RequireAuthorization("AdminOrManager");
+        return true;
     }
 }

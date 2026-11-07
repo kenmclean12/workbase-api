@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.Services.Auth;
-using newproj.Services.UserInvites;
 using newProj.Services.Clients;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -14,6 +13,7 @@ using newproj.Services.RequestHistoryRecords;
 using newproj.Services.Clients;
 using newproj.Services.RequestNotes;
 using newproj.Services.Requests;
+using newproj.Services.UserInvites;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +66,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddProblemDetails();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserInviteService, UserInviteService>();
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IRequestService, RequestService>();
@@ -96,5 +97,4 @@ app.UseExceptionHandler();
 app.MapControllers();
 
 app.MapAuthEndpoints();
-app.MapUserInviteEndpoints();
 app.Run();
