@@ -7,12 +7,12 @@ namespace newproj.Controllers;
 
 [ApiController]
 [Authorize]
-[Route("api/[controller]")]
+[Route("address")]
 public class AddressController(IAddressService addressService) : ControllerBase
 {
     private readonly IAddressService _addressService = addressService;
 
-    [HttpPut("{clientId}")]
+    [HttpPut("{clientId:int}")]
     [Authorize(Policy = "AdminOrManager")]
     public async Task<IActionResult> Update(AddressUpdateDTO dto, int clientId)
     {
@@ -21,7 +21,7 @@ public class AddressController(IAddressService addressService) : ControllerBase
         return Ok(response);
     }
 
-    [HttpDelete("{clientId}")]
+    [HttpDelete("{clientId:int}")]
     [Authorize(Policy = "AdminOrManager")]
     public async Task<IActionResult> Delete(int clientId)
     {

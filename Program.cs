@@ -3,7 +3,6 @@ using newproj.Data;
 using newproj.Services.Auth;
 using newproj.Services.Requests;
 using newproj.Services.UserInvites;
-using newproj.Services.Users;
 using newProj.Services.Clients;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -11,6 +10,7 @@ using System.Text;
 using newproj.Models.Users;
 using System.Security.Claims;
 using newproj.Services.Addresses;
+using newproj.Services.Users;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,7 +59,10 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IAddressService, AddressService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddValidation();
 
 var app = builder.Build();
@@ -72,12 +75,18 @@ using (var scope = app.Services.CreateScope())
     SeedData.Initialize(db);
 }
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapControllers();
 
 app.MapAuthEndpoints();
-app.MapUserEndpoints();
 app.MapClientEndpoints();
 app.MapRequestEndpoints();
 app.MapRequestNoteEndpoints();

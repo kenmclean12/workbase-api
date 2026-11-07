@@ -1,5 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.DTO.User;
@@ -7,121 +5,215 @@ using newproj.Models.Users;
 
 namespace newproj.Services.Users;
 
-public static class UserService
-{
-    public static void MapUserEndpoints(this WebApplication app)
-    {
-        RouteGroupBuilder group = app.MapGroup("/user");
+// public static class UserService
+// {
+//     public static void MapUserEndpoints(this WebApplication app)
+//     {
+//         RouteGroupBuilder group = app.MapGroup("/user");
 
-        group.MapGet("/", async (AppDbContext db) =>
-        {
-            var users = await db.Users
-                .Where(u => u.ClientId == null)
-                .ToArrayAsync();
+//         group.MapGet("/", async (AppDbContext db) =>
+//         {
+//             var users = await db.Users
+//                 .Where(u => u.ClientId == null)
+//                 .ToArrayAsync();
 
-            return Results.Ok(users.Select(u => u.ToResponse()).ToArray());
-        });
+//             return Results.Ok(users.Select(u => u.ToResponse()).ToArray());
+//         });
 
-        group.MapGet("/assignable-users", async (AppDbContext db) =>
-        {
-            var users = await db.Users
-                .Where(u => u.ClientId == null)
-                .Where(u => u.Role != UserRole.READONLY)
-                .OrderByDescending(u => u.Role)
-                .ToArrayAsync();
+//         group.MapGet("/assignable-users", async (AppDbContext db) =>
+//         {
+//             var users = await db.Users
+//                 .Where(u => u.ClientId == null)
+//                 .Where(u => u.Role != UserRole.READONLY)
+//                 .OrderByDescending(u => u.Role)
+//                 .ToArrayAsync();
 
-            return Results.Ok(users.Select(u => u.ToResponse()).ToArray());
-        });
+//             return Results.Ok(users.Select(u => u.ToResponse()).ToArray());
+//         });
 
-        group.MapGet("/client/{clientId:int}", async (AppDbContext db, int clientId) =>
-        {
-            var users = await db.Users
-                .Where(u => u.ClientId == clientId)
-                .OrderByDescending(u => u.Role)
-                .ToArrayAsync();
+//         group.MapGet("/client/{clientId:int}", async (AppDbContext db, int clientId) =>
+//         {
+//             var users = await db.Users
+//                 .Where(u => u.ClientId == clientId)
+//                 .OrderByDescending(u => u.Role)
+//                 .ToArrayAsync();
 
-            return Results.Ok(users.Select(u => u.ToResponse()).ToArray());
-        });
+//             return Results.Ok(users.Select(u => u.ToResponse()).ToArray());
+//         });
 
-        group.MapGet("/{id:int}", async (AppDbContext db, int id) =>
-        {
-            var user = await db.Users.FindAsync(id);
-            if (user is null) return Results.NotFound($"No users found with the provided id: {id}");
-            return Results.Ok(user.ToResponse());
-        });
+//         group.MapGet("/{id:int}", async (AppDbContext db, int id) =>
+//         {
+//             var user = await db.Users.FindAsync(id);
+//             if (user is null) return Results.NotFound($"No users found with the provided id: {id}");
+//             return Results.Ok(user.ToResponse());
+//         });
 
-        group.MapPost("/", async (AppDbContext db, UserCreateDTO dto) =>
-        {
-            User? existingEmailUser = await db.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
-            if (existingEmailUser is not null)
-            {
-                return Results.Conflict($"User already exists with the provided email: {dto.Email}");
-            }
+//         group.MapPost("/", async (AppDbContext db, UserCreateDTO dto) =>
+//         {
+//             User? existingEmailUser = await db.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+//             if (existingEmailUser is not null)
+//             {
+//                 return Results.Conflict($"User already exists with the provided email: {dto.Email}");
+//             }
 
-            User user = User.Create(dto);
-            db.Users.Add(user);
-            await db.SaveChangesAsync();
+//             User user = User.Create(dto);
+//             db.Users.Add(user);
+//             await db.SaveChangesAsync();
 
-            return Results.Created($"/user/{user.Id}", user.ToResponse());
-        });
+//             return Results.Created($"/user/{user.Id}", user.ToResponse());
+//         });
 
-        group.MapPost("/reset-password", async (AppDbContext db, HttpContext context, UserPasswordResetDTO dto) =>
-        {
-            if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int id))
-            {
-                return Results.Forbid();
-            }
+//         group.MapPost("/reset-password", async (AppDbContext db, HttpContext context, UserPasswordResetDTO dto) =>
+//         {
+//             if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int id))
+//             {
+//                 return Results.Forbid();
+//             }
 
-            var user = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
-            if (user is null)
-            {
-                return Results.NotFound($"No user was found with the provided id: {id}");
-            }
+//             var user = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
+//             if (user is null)
+//             {
+//                 return Results.NotFound($"No user was found with the provided id: {id}");
+//             }
 
-            if (!user.ResetPassword(dto))
-            {
-              return Results.BadRequest($"The provided existing password did not match the password for user id: {id}");
-            }
+//             if (!user.ResetPassword(dto))
+//             {
+//               return Results.BadRequest($"The provided existing password did not match the password for user id: {id}");
+//             }
 
             
-            await db.SaveChangesAsync();
-            return Results.Ok(user.ToResponse());
-        });
+//             await db.SaveChangesAsync();
+//             return Results.Ok(user.ToResponse());
+//         });
 
-        group.MapPut("/{id:int}", async (AppDbContext db, UserUpdateDTO dto, int id) =>
+//         group.MapPut("/{id:int}", async (AppDbContext db, UserUpdateDTO dto, int id) =>
+//         {
+//             User? existingEmailUser = await db.Users.FirstOrDefaultAsync(u => u.Email == dto.Email && u.Id != id);
+//             if (existingEmailUser is not null)
+//             {
+//                 return Results.Conflict($"User already exists with the provided email: {dto.Email}");
+//             }
+
+//             User? existingUser = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
+//             if (existingUser is null)
+//             {
+//                 return Results.NotFound($"No user was found with the provided id: {id}");
+//             }
+
+//             existingUser.Update(dto);
+//             await db.SaveChangesAsync();
+
+//             return Results.Ok(existingUser.ToResponse());
+//         })
+//             .RequireAuthorization("AdminOrManager");
+
+//         group.MapDelete("/{id:int}", async (AppDbContext db, int id) =>
+//         {
+//             User? existingUser = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
+//             if (existingUser is null)
+//             {
+//                 return Results.NotFound($"No user was found with the provided id: {id}");
+//             }
+
+//             db.Users.Remove(existingUser);
+//             await db.SaveChangesAsync();
+
+//             return Results.NoContent();
+//         })
+//             .RequireAuthorization("AdminOrManager");
+//     }
+// }
+
+public class UserService(AppDbContext db) : IUserService
+{
+    private readonly AppDbContext _db = db;
+
+    public async Task<ICollection<UserResponseDTO>> FindAll()
+    {
+        ICollection<User> users = await _db.Users
+            .Where(u => u.ClientId == null)
+            .ToArrayAsync();
+
+        return [.. users.Select(u => u.ToResponse())];
+    }
+
+    public async Task<UserResponseDTO?> FindOne(int id)
+    {
+        User? user = await _db.Users.FindAsync(id);
+        if (user is null) return null;
+        return user.ToResponse();
+    }
+
+    public async Task<ICollection<UserResponseDTO>> FindAssignableUsers()
+    {
+        ICollection<User> users = await _db.Users
+            .Where(u => u.ClientId == null)
+            .Where(u => u.Role != UserRole.READONLY)
+            .OrderByDescending(u => u.Role)
+            .ToArrayAsync();
+
+        return [.. users.Select(u => u.ToResponse())];
+    }
+
+    public async Task<ICollection<UserResponseDTO>> FindClientUsers(int clientId)
+    {
+        ICollection<User> users = await _db.Users
+            .Where(u => u.ClientId == clientId)
+            .OrderByDescending(u => u.Role)
+            .ToArrayAsync();
+
+        return [.. users.Select(u => u.ToResponse())];
+    }
+
+    public async Task<UserResponseDTO?> Create(UserCreateDTO dto)
+    {
+        User? existingEmailUser = await _db.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+        if (existingEmailUser is not null) return null;
+
+        User user = User.Create(dto);
+        _db.Users.Add(user);
+        await _db.SaveChangesAsync();
+
+        return user.ToResponse();
+    }
+
+    public async Task<UserUpdateResult> Update(UserUpdateDTO dto, int id)
+    {
+        User? existingUser = await _db.Users.FindAsync(id);
+        if (existingUser is null) return UserUpdateResult.UserNotFound;
+
+        User? existingEmailUser = await _db.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+        if (existingEmailUser is not null) return UserUpdateResult.DuplicateEmail;
+
+        existingUser.Update(dto);
+        await _db.SaveChangesAsync();
+
+        return UserUpdateResult.Success;
+    }
+
+    public async Task<bool> Delete(int id)
+    {
+        User? existingUser = await _db.Users.FindAsync(id);
+        if (existingUser is null) return false;
+
+        _db.Users.Remove(existingUser);
+        await _db.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<ResetPasswordResult> ResetPassword(UserPasswordResetDTO dto, int id)
+    {
+        User? existingUser = await _db.Users.FindAsync(id);
+        if (existingUser is null) return ResetPasswordResult.UserNotFound;
+
+        if (!existingUser.ResetPassword(dto))
         {
-            User? existingEmailUser = await db.Users.FirstOrDefaultAsync(u => u.Email == dto.Email && u.Id != id);
-            if (existingEmailUser is not null)
-            {
-                return Results.Conflict($"User already exists with the provided email: {dto.Email}");
-            }
+            return ResetPasswordResult.WrongPassword;
+        }
 
-            User? existingUser = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
-            if (existingUser is null)
-            {
-                return Results.NotFound($"No user was found with the provided id: {id}");
-            }
-
-            existingUser.Update(dto);
-            await db.SaveChangesAsync();
-
-            return Results.Ok(existingUser.ToResponse());
-        })
-            .RequireAuthorization("AdminOrManager");
-
-        group.MapDelete("/{id:int}", async (AppDbContext db, int id) =>
-        {
-            User? existingUser = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
-            if (existingUser is null)
-            {
-                return Results.NotFound($"No user was found with the provided id: {id}");
-            }
-
-            db.Users.Remove(existingUser);
-            await db.SaveChangesAsync();
-
-            return Results.NoContent();
-        })
-            .RequireAuthorization("AdminOrManager");
+        await _db.SaveChangesAsync();
+        
+        return ResetPasswordResult.Success;
     }
 }

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "ZRSqPd2jlbQ=",
+  "dgSpecHash": "Hc1Y1omc4c4=",
   "success": true,
   "projectFilePath": "/Users/kenmclean/Desktop/C#/newproj/newproj.csproj",
   "expectedPackageFiles": [
@@ -23,6 +23,7 @@
     "/Users/kenmclean/.nuget/packages/microsoft.entityframeworkcore.relational/10.0.11/microsoft.entityframeworkcore.relational.10.0.11.nupkg.sha512",
     "/Users/kenmclean/.nuget/packages/microsoft.entityframeworkcore.sqlite/10.0.11/microsoft.entityframeworkcore.sqlite.10.0.11.nupkg.sha512",
     "/Users/kenmclean/.nuget/packages/microsoft.entityframeworkcore.sqlite.core/10.0.11/microsoft.entityframeworkcore.sqlite.core.10.0.11.nupkg.sha512",
+    "/Users/kenmclean/.nuget/packages/microsoft.extensions.apidescription.server/10.0.0/microsoft.extensions.apidescription.server.10.0.0.nupkg.sha512",
     "/Users/kenmclean/.nuget/packages/microsoft.extensions.dependencymodel/10.0.11/microsoft.extensions.dependencymodel.10.0.11.nupkg.sha512",
     "/Users/kenmclean/.nuget/packages/microsoft.identitymodel.abstractions/8.22.0/microsoft.identitymodel.abstractions.8.22.0.nupkg.sha512",
     "/Users/kenmclean/.nuget/packages/microsoft.identitymodel.jsonwebtokens/8.22.0/microsoft.identitymodel.jsonwebtokens.8.22.0.nupkg.sha512",
@@ -30,7 +31,7 @@
     "/Users/kenmclean/.nuget/packages/microsoft.identitymodel.protocols/8.19.2/microsoft.identitymodel.protocols.8.19.2.nupkg.sha512",
     "/Users/kenmclean/.nuget/packages/microsoft.identitymodel.protocols.openidconnect/8.19.2/microsoft.identitymodel.protocols.openidconnect.8.19.2.nupkg.sha512",
     "/Users/kenmclean/.nuget/packages/microsoft.identitymodel.tokens/8.22.0/microsoft.identitymodel.tokens.8.22.0.nupkg.sha512",
-    "/Users/kenmclean/.nuget/packages/microsoft.openapi/2.0.0/microsoft.openapi.2.0.0.nupkg.sha512",
+    "/Users/kenmclean/.nuget/packages/microsoft.openapi/2.7.5/microsoft.openapi.2.7.5.nupkg.sha512",
     "/Users/kenmclean/.nuget/packages/microsoft.visualstudio.solutionpersistence/1.0.52/microsoft.visualstudio.solutionpersistence.1.0.52.nupkg.sha512",
     "/Users/kenmclean/.nuget/packages/mono.texttemplating/3.0.0/mono.texttemplating.3.0.0.nupkg.sha512",
     "/Users/kenmclean/.nuget/packages/newtonsoft.json/13.0.4/newtonsoft.json.13.0.4.nupkg.sha512",
@@ -40,6 +41,10 @@
     "/Users/kenmclean/.nuget/packages/sqlitepclraw.core/2.1.12/sqlitepclraw.core.2.1.12.nupkg.sha512",
     "/Users/kenmclean/.nuget/packages/sqlitepclraw.lib.e_sqlite3/2.1.12/sqlitepclraw.lib.e_sqlite3.2.1.12.nupkg.sha512",
     "/Users/kenmclean/.nuget/packages/sqlitepclraw.provider.e_sqlite3/2.1.12/sqlitepclraw.provider.e_sqlite3.2.1.12.nupkg.sha512",
+    "/Users/kenmclean/.nuget/packages/swashbuckle.aspnetcore/10.3.1/swashbuckle.aspnetcore.10.3.1.nupkg.sha512",
+    "/Users/kenmclean/.nuget/packages/swashbuckle.aspnetcore.swagger/10.3.1/swashbuckle.aspnetcore.swagger.10.3.1.nupkg.sha512",
+    "/Users/kenmclean/.nuget/packages/swashbuckle.aspnetcore.swaggergen/10.3.1/swashbuckle.aspnetcore.swaggergen.10.3.1.nupkg.sha512",
+    "/Users/kenmclean/.nuget/packages/swashbuckle.aspnetcore.swaggerui/10.3.1/swashbuckle.aspnetcore.swaggerui.10.3.1.nupkg.sha512",
     "/Users/kenmclean/.nuget/packages/system.codedom/6.0.0/system.codedom.6.0.0.nupkg.sha512",
     "/Users/kenmclean/.nuget/packages/system.composition/9.0.0/system.composition.9.0.0.nupkg.sha512",
     "/Users/kenmclean/.nuget/packages/system.composition.attributedmodel/9.0.0/system.composition.attributedmodel.9.0.0.nupkg.sha512",
@@ -49,18 +54,5 @@
     "/Users/kenmclean/.nuget/packages/system.composition.typedparts/9.0.0/system.composition.typedparts.9.0.0.nupkg.sha512",
     "/Users/kenmclean/.nuget/packages/system.identitymodel.tokens.jwt/8.22.0/system.identitymodel.tokens.jwt.8.22.0.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1903",
-      "level": "Warning",
-      "message": "Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc",
-      "projectPath": "/Users/kenmclean/Desktop/C#/newproj/newproj.csproj",
-      "warningLevel": 1,
-      "filePath": "/Users/kenmclean/Desktop/C#/newproj/newproj.csproj",
-      "libraryId": "Microsoft.OpenApi",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    }
-  ]
+  "logs": []
 }
