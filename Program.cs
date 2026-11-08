@@ -65,6 +65,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddProblemDetails();
+builder.Services.AddValidation();
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserInviteService, UserInviteService>();
@@ -73,7 +75,6 @@ builder.Services.AddScoped<IAddressService, AddressService>();
 builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped<IRequestNoteService, RequestNoteService>();
 builder.Services.AddScoped<IRequestHistoryService, RequestHistoryService>();
-builder.Services.AddValidation();
 
 var app = builder.Build();
 app.UseCors("AllowLocalHost");
