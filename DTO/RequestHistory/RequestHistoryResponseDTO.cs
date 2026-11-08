@@ -3,21 +3,21 @@ using newproj.DTO.User;
 
 namespace newproj.DTO.RequestHistory;
 
-public class RequestHistoryResponseDTO
+public record RequestHistoryResponseDTO
 {
-    public int Id { get; set; }
+    public int Id { get; init; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; init; }
 
-    public int RequestId { get; set; }
+    public int RequestId { get; init; }
 
-    public RequestResponseDTO Request { get; set; } = null!;
+    public RequestResponseDTO Request { get; init; } = null!;
 
-    public int UserId { get; set; }
+    public int UserId { get; init; }
 
-    public UserResponseDTO User { get; set; } = null!;
+    public UserResponseDTO User { get; init; } = null!;
 
-    public string Action { get; set; } = null!;
+    public string Action { get; init; } = null!;
 
-    public string? Details { get; set; }
+    public string? Details { get; init; }
 }

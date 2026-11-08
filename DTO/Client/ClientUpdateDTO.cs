@@ -2,20 +2,20 @@ using System.ComponentModel.DataAnnotations;
 
 namespace newproj.DTO.Client;
 
-public class ClientUpdateDTO
+public record ClientUpdateDTO
 {
     [MaxLength(30)]
-    public string? Name { get; set; }
+    public string? Name { get; init; }
 
     [MaxLength(50)]
-    public string? Email { get; set; }
+    public string? Email { get; init; }
 
     [MaxLength(16)]
-    public string? Phone { get; set; }
+    public string? Phone { get; init; }
 
     [MaxLength(50)]
-    public string? Website { get; set; }
+    public string? Website { get; init; }
 
     [MaxLength(300)]
-    public string? Description { get; set; }
+    public string? Description { get; init; }
 }

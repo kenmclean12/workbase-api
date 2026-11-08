@@ -2,13 +2,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace newproj.DTO.User;
 
-public class UserPasswordResetDTO
+public record UserPasswordResetDTO
 {
     [Required]
     [MaxLength(50)]
-    public string ExistingPassword { get; set; } = null!;
+    public string ExistingPassword { get; init; } = null!;
 
     [Required]
     [MaxLength(50)]
-    public string NewPassword { get; set; } = null!;
+    public string NewPassword { get; init; } = null!;
 }

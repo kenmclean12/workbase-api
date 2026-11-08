@@ -2,19 +2,19 @@ using newproj.DTO.User;
 
 namespace newproj.DTO.RequestNote;
 
-public class RequestNoteResponseDTO
+public record RequestNoteResponseDTO
 {
-    public int Id { get; set; }
+    public int Id { get; init; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; init; }
 
-    public int RequestId { get; set; }
+    public int RequestId { get; init; }
 
-    public int CreatedByUserId { get; set; }
+    public int CreatedByUserId { get; init; }
 
-    public UserResponseDTO CreatedByUser { get; set; } = null!;
+    public UserResponseDTO CreatedByUser { get; init; } = null!;
 
-    public string Content { get; set; } = null!;
+    public string Content { get; init; } = null!;
 
-    public DateTime? UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; init; }
 }

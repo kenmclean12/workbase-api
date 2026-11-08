@@ -3,27 +3,26 @@ using newproj.Models.Users;
 
 namespace newproj.DTO.User;
 
-public class UserCreateDTO
+public record UserCreateDTO
 {
+    [Required]
+    [MaxLength(25)]
+    public string FirstName { get; init; } = null!;
 
     [Required]
     [MaxLength(25)]
-    public string FirstName { get; set; } = null!;
-
-    [Required]
-    [MaxLength(25)]
-    public string LastName { get; set; } = null!;
+    public string LastName { get; init; } = null!;
 
     [Required]
     [EmailAddress]
     [MaxLength(50)]
-    public string Email { get; set; } = null!;
+    public string Email { get; init; } = null!;
 
     [Required]
     [MaxLength(50)]
-    public string Password { get; set; } = null!;
+    public string Password { get; init; } = null!;
 
-    public UserRole Role { get; set; } = UserRole.READONLY;
+    public UserRole Role { get; init; } = UserRole.READONLY;
 
-    public int? ClientId { get; set; }
+    public int? ClientId { get; init; }
 }

@@ -3,18 +3,18 @@ using newproj.Models.Users;
 
 namespace newproj.DTO.UserInvite;
 
-public class UserInviteCreateDTO
+public record UserInviteCreateDTO
 {
     [Required]
     [EmailAddress]
     [MaxLength(50)]
-    public string Email { get; set; } = String.Empty;
+    public string Email { get; init; } = String.Empty;
 
-    public UserRole? Role { get; set; }
+    public UserRole? Role { get; init; }
 
-    public string TokenHash { get; set; } = null!;
+    public string TokenHash { get; init; } = null!;
 
-    public int? ClientId { get; set; }
+    public int? ClientId { get; init; }
 
-    public int InvitedByUserId { get; set; }
+    public int InvitedByUserId { get; init; }
 }

@@ -2,9 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace newproj.DTO.RequestNote;
 
-public class RequestNoteUpdateDTO
+public record RequestNoteUpdateDTO
 {
     [Required]
     [MaxLength(2000)]
-    public string? Content { get; set; }
+    public string? Content { get; init; }
 }

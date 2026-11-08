@@ -2,14 +2,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace newproj.DTO.RequestHistory;
 
-public class RequestHistoryCreateDTO
+public record RequestHistoryCreateDTO
 {
-    public int RequestId { get; set; }
+    public int RequestId { get; init; }
 
-    public int UserId { get; set; }
+    public int UserId { get; init; }
 
     [Required]
     [MaxLength(100)]
-    public string Action { get; set; } = null!;
+    public string Action { get; init; } = null!;
 }
-

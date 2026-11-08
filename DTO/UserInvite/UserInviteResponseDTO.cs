@@ -4,9 +4,9 @@ using newproj.Models.Users;
 
 namespace newproj.DTO.UserInvite;
 
-public class UserInviteResponseDTO
+public record UserInviteResponseDTO
 {
-    public int Id { get; set; }
+    public int Id { get; init; }
 
     public DateTime CreatedAt { get; set; }
 

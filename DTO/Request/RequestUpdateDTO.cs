@@ -2,9 +2,9 @@ using newproj.Models.Requests;
 
 namespace newproj.DTO.Request;
 
-public class RequestUpdateDTO
+public record RequestUpdateDTO
 {
-    public int? AssignedToUserId { get; set; }
+    public int? AssignedToUserId { get; init; }
 
-    public RequestStatus? Status { get; set; }
+    public RequestStatus? Status { get; init; }
 }

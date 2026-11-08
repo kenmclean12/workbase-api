@@ -2,20 +2,20 @@ using System.ComponentModel.DataAnnotations;
 
 namespace newproj.DTO.Address;
 
-public class AddressUpdateDTO
+public record AddressUpdateDTO
 {
     [MaxLength(50)]
-    public string? Street { get; set; }
+    public string? Street { get; init; }
 
     [MaxLength(25)]
-    public string? City { get; set; }
+    public string? City { get; init; }
 
     [MaxLength(25)]
-    public string? State { get; set; }
+    public string? State { get; init; }
 
     [MaxLength(25)]
-    public string? Country { get; set; }
+    public string? Country { get; init; }
 
     [MaxLength(25)]
-    public string? PostalCode { get; set; }
+    public string? PostalCode { get; init; }
 }

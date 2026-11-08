@@ -61,9 +61,9 @@ public class Client : EntityBaseClass
             Phone = this.Phone,
             Website = this.Website,
             Description = this.Description,
+            Address = this.Address is Address address ? address.ToResponse() : null
         };
 
-        if (this.Address is Address address) response.Address = address.ToResponse();
         return response;
     }
 }

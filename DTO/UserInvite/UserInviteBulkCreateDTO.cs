@@ -3,12 +3,12 @@ using newproj.Models.Users;
 
 namespace newproj.DTO.UserInvite;
 
-public class UserInviteBulkCreateDTO
+public record UserInviteBulkCreateDTO
 {
     [Required]
-    public string[] Emails { get; set; } = [];
+    public string[] Emails { get; init; } = [];
 
-    public UserRole? Role { get; set; }
+    public UserRole? Role { get; init; }
 
-    public int? ClientId { get; set; }
+    public int? ClientId { get; init; }
 }

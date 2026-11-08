@@ -4,29 +4,29 @@ using newproj.DTO.User;
 
 namespace newproj.DTO.Request;
 
-public class RequestResponseDTO
+public record RequestResponseDTO
 {
-    public int Id { get; set; }
+    public int Id { get; init; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; init; }
 
-    public int ClientId { get; set; }
+    public int ClientId { get; init; }
 
-    public ClientResponseDTO Client { get; set; } = null!;
+    public ClientResponseDTO Client { get; init; } = null!;
 
-    public int CreatedByUserId { get; set; }
+    public int CreatedByUserId { get; init; }
 
-    public UserResponseDTO CreatedByUser { get; set; } = null!;
+    public UserResponseDTO CreatedByUser { get; init; } = null!;
 
-    public int? AssignedToUserId { get; set; }
+    public int? AssignedToUserId { get; init; }
 
-    public string Title { get; set; } = null!;
+    public string Title { get; init; } = null!;
 
-    public string Description { get; set; } = null!;
+    public string Description { get; init; } = null!;
 
-    public RequestStatus Status { get; set; }
+    public RequestStatus Status { get; init; }
 
-    public RequestPriority Priority { get; set; }
+    public RequestPriority Priority { get; init; }
 
-    public DateTime? UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; init; }
 }

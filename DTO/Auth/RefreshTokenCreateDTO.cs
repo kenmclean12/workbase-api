@@ -2,12 +2,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace newproj.DTO.Auth;
 
-public class RefreshTokenCreateDTO
+public record RefreshTokenCreateDTO
 {
-    public int UserId { get; set; }
+    public int UserId { get; init; }
 
     [Required]
-    public string TokenHash { get; set; } = String.Empty;
+    public string TokenHash { get; init; } = String.Empty;
 
-    public DateTime ExpiresAt { get; set; }
+    public DateTime ExpiresAt { get; init; }
 }

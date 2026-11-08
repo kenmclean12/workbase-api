@@ -3,27 +3,27 @@ using newproj.DTO.Address;
 
 namespace newproj.DTO.Client;
 
-public class ClientCreateDTO
+public record ClientCreateDTO
 {
     [Required]
     [MaxLength(30)]
-    public string Name { get; set; } = null!;
+    public string Name { get; init; } = null!;
 
     [Required]
     [MaxLength(50)]
-    public string InitUserEmail { get; set; } = null!;
+    public string InitUserEmail { get; init; } = null!;
 
-    public AddressCreateDTO? AddressDTO { get; set; }
+    public AddressCreateDTO? AddressDTO { get; init; }
 
     [MaxLength(50)]
-    public string? Email { get; set; }
+    public string? Email { get; init; }
 
     [MaxLength(16)]
-    public string? Phone { get; set; }
+    public string? Phone { get; init; }
 
     [MaxLength(50)]
-    public string? Website { get; set; }
+    public string? Website { get; init; }
 
     [MaxLength(300)]
-    public string? Description { get; set; }
+    public string? Description { get; init; }
 }
