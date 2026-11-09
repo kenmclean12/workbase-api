@@ -12,7 +12,7 @@ public class AddressController(IAddressService addressService) : ControllerBase
 {
     private readonly IAddressService _addressService = addressService;
 
-    [HttpPut("{clientId:int}")]
+    [HttpPatch("{clientId:int}")]
     [Authorize(Policy = "AdminOrManager")]
     public async Task<IActionResult> Update(AddressUpdateDTO dto, int clientId)
     {

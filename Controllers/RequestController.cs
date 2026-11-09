@@ -63,7 +63,7 @@ public class RequestController(IRequestService requestService) : ControllerBase
         };
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPatch("{id:int}")]
     [Authorize(Policy = "BlockReadonly")]
     public async Task<IActionResult> Update(RequestUpdateDTO dto, int id)
     {

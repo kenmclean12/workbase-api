@@ -35,7 +35,7 @@ public class ClientController(IClientService clientService) : ControllerBase
         return Created($"client/{client.Id}", client);
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPatch("{id:int}")]
     [Authorize(Policy = "AdminOrManager")]
     public async Task<IActionResult> Update(ClientUpdateDTO dto, int id)
     {

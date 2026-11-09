@@ -48,7 +48,7 @@ public class UserController(IUserService userService) : ControllerBase
         return Created($"/users/{user.Id}", user);
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPatch("{id:int}")]
     [Authorize(Policy = "AdminOrManager")]
     public async Task<IActionResult> Update(UserUpdateDTO dto, int id)
     {

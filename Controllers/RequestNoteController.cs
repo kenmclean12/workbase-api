@@ -39,7 +39,7 @@ public class RequestNoteController(IRequestNoteService requestNoteService) : Con
         };
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPatch("{id:int}")]
     [Authorize(Policy = "BlockReadonly")]
     public async Task<IActionResult> Update(RequestNoteUpdateDTO dto, int id)
     {
