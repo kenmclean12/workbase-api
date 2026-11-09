@@ -46,9 +46,9 @@ public class ClientController(IClientService clientService) : ControllerBase
 
     [HttpDelete("{id:int}")]
     [Authorize(Policy = "AdminOrManager")]
-    public async Task<IActionResult> Delete(HttpContext context, int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        if (int.TryParse(context.User.FindFirstValue("client_id"), out int clientId) && id == clientId)
+        if (int.TryParse(HttpContext.User.FindFirstValue("client_id"), out int clientId) && id == clientId)
         {
             return Forbid();
         }

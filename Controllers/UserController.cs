@@ -72,9 +72,9 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpPost("reset-password")]
-    public async Task<IActionResult> ResetPassword(HttpContext context, UserPasswordResetDTO dto)
+    public async Task<IActionResult> ResetPassword(UserPasswordResetDTO dto)
     {
-        if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int id))
+        if (!int.TryParse(HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out int id))
         {
             return Forbid("You are not authorized to perform this action");
         }

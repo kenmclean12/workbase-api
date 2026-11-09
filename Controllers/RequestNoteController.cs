@@ -21,9 +21,9 @@ public class RequestNoteController(IRequestNoteService requestNoteService) : Con
 
     [HttpPost]
     [Authorize(Policy = "BlockReadonly")]
-    public async Task<IActionResult> Create(HttpContext context, RequestNoteCreateDTO dto)
+    public async Task<IActionResult> Create(RequestNoteCreateDTO dto)
     {
-        if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int createdByUserId))
+        if (!int.TryParse(HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out int createdByUserId))
         {
             return Forbid();
         }
@@ -41,9 +41,9 @@ public class RequestNoteController(IRequestNoteService requestNoteService) : Con
 
     [HttpPut("{id:int}")]
     [Authorize(Policy = "BlockReadonly")]
-    public async Task<IActionResult> Update(HttpContext context, RequestNoteUpdateDTO dto, int id)
+    public async Task<IActionResult> Update(RequestNoteUpdateDTO dto, int id)
     {
-        if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
+        if (!int.TryParse(HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
         {
             return Forbid();
         }
@@ -60,9 +60,9 @@ public class RequestNoteController(IRequestNoteService requestNoteService) : Con
 
     [HttpDelete("{id:int}")]
     [Authorize(Policy = "BlockReadonly")]
-    public async Task<IActionResult> Delete(HttpContext context, int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
+        if (!int.TryParse(HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
         {
             return Forbid();
         }
