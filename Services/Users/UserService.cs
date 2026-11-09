@@ -4,6 +4,7 @@ using newproj.DTO.User;
 using newproj.Models.Users;
 
 namespace newproj.Services.Users;
+
 public class UserService(AppDbContext db) : IUserService
 {
     private readonly AppDbContext _db = db;
