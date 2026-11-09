@@ -17,8 +17,7 @@ public class RequestService(AppDbContext db) : IRequestService
         ICollection<Request> requests = await _db.Requests
                 .Include(r => r.Client)
                 .Include(r => r.CreatedByUser)
-                .OrderByDescending(r => r.UpdatedAt)
-                .ThenByDescending(r => r.CreatedAt)
+                .OrderByDescending(r => r.UpdatedAt ?? r.CreatedAt)
                 .ToArrayAsync();
 
 
