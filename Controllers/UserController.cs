@@ -8,7 +8,7 @@ namespace newproj.Controllers;
 
 [ApiController]
 [Authorize]
-[Route("users")]
+[Route("user")]
 public class UserController(IUserService userService) : ControllerBase
 {
     private readonly IUserService _userService = userService;

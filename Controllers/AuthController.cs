@@ -13,6 +13,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     private readonly IAuthService _authService = authService;
 
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<IActionResult> Login(LoginDTO dto)
     {
         LoginResult result = await _authService.Login(dto);
@@ -30,6 +31,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     [HttpPost("register")]
+    [AllowAnonymous]
     public async Task<IActionResult> Register(RegisterDTO dto)
     {
         RegisterResult result = await _authService.Register(dto);
@@ -47,6 +49,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     [HttpPost("refresh-token")]
+    [AllowAnonymous]
     public async Task<IActionResult> RefreshToken(RefreshTokenDTO dto)
     {
         RefreshAccessTokenResult result = await _authService.RefreshAccessToken(dto);
@@ -65,6 +68,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     [HttpPost("logout")]
+    [AllowAnonymous]
     public async Task<IActionResult> Logout(RefreshTokenDTO dto)
     {
         LogoutResult result = await _authService.Logout(dto);
