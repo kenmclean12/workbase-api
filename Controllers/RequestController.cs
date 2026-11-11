@@ -43,12 +43,12 @@ public class RequestController(IRequestService requestService) : ControllerBase
     [Authorize(Policy = "BlockReadonly")]
     public async Task<IActionResult> Create(RequestCreateDTO dto)
     {
-        if (!int.TryParse(HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out int createdByUserId))
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int createdByUserId))
         {
             return Forbid("No user id provided in token");
         }
 
-        if (!int.TryParse(HttpContext.User.FindFirstValue("client_id"), out int requestUserClientId) || requestUserClientId != dto.ClientId)
+        if (!int.TryParse(User.FindFirstValue("client_id"), out int requestUserClientId) || requestUserClientId != dto.ClientId)
         {
             return Forbid("Must be a valid client user to create a request");
         }
@@ -67,7 +67,7 @@ public class RequestController(IRequestService requestService) : ControllerBase
     [Authorize(Policy = "BlockReadonly")]
     public async Task<IActionResult> Update(RequestUpdateDTO dto, int id)
     {
-        if (!int.TryParse(HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out int actionUserId))
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int actionUserId))
         {
             return Forbid("No user id provided in token");
         }
