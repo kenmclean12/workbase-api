@@ -17,6 +17,8 @@ using newproj.Services.Requests;
 using newproj.Services.UserInvites;
 using FluentEmail.MailKitSmtp;
 using newproj.Services.Emails;
+using MailKit.Security;
+using FluentEmail.Core.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,14 +58,9 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services
-    .AddFluentEmail(builder.Configuration["Email:FromEmail"])
-    .AddMailKitSender(new SmtpClientOptions
-    {
-        Server = builder.Configuration["Email:Host"],
-        Port = builder.Configuration.GetValue<int>("Email:Port"),
-        User = builder.Configuration["Email:Username"],
-        Password = builder.Configuration["Email:Password"]
-    });
+    .AddFluentEmail(builder.Configuration["Email:FromEmail"]);
+
+builder.Services.AddTransient<ISender, ResendMailKitSender>();
 
 builder.Services.AddCors(options =>
 {

@@ -1,9 +1,11 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 using newproj.Data;
 using newproj.DTO.UserInvite;
 using newproj.Models.UserInvites;
+using newproj.Models.Users;
 using newproj.Services.Emails;
 
 namespace newproj.Services.UserInvites;
@@ -42,8 +44,28 @@ public class UserInviteService(AppDbContext db, IEmailService emailService, IWeb
         string htmlTemplate = await File.ReadAllTextAsync(templatePath);
         string frontendUrl = _configuration["Frontend:URL"] ?? throw new InvalidOperationException("Frontend:URL is not configured");
 
+        HashSet<string> uniqueEmailSet = new(dto.Emails.Where(e => !string.IsNullOrWhiteSpace(e)), StringComparer.OrdinalIgnoreCase);
+        if (uniqueEmailSet.Count == 0) return true;
+
+        string[] existingEmailUsers = await _db.Users
+            .Where(u => uniqueEmailSet.Contains(u.Email))
+            .Select(u => u.Email)
+            .ToArrayAsync();
+
+        foreach (string email in existingEmailUsers) uniqueEmailSet.Remove(email);
+
+        string[] existingInviteEmails = await _db.UserInvites
+            .Where(ui => uniqueEmailSet.Contains(ui.Email) && ui.ExpiresAt > DateTime.UtcNow)
+            .Select(ui => ui.Email)
+            .ToArrayAsync();
+
+        foreach (string email in existingInviteEmails) uniqueEmailSet.Remove(email);
+
+        string[] uniqueEmails = uniqueEmailSet.ToArray();
+        if (uniqueEmails.Length == 0) return true;
+
         List<(string email, string body)> pendingEmails = new();
-        for (int i = 0; i < dto.Emails.Length; i++)
+        for (int i = 0; i < uniqueEmails.Length; i++)
         {
             byte[] tokenBytes = RandomNumberGenerator.GetBytes(32);
             string token = Convert.ToBase64String(tokenBytes);
@@ -51,7 +73,7 @@ public class UserInviteService(AppDbContext db, IEmailService emailService, IWeb
 
             var createDTO = new UserInviteCreateDTO
             {
-                Email = dto.Emails[i],
+                Email = uniqueEmails[i],
                 Role = dto.Role,
                 ClientId = dto.ClientId,
                 TokenHash = tokenHash,
@@ -63,7 +85,7 @@ public class UserInviteService(AppDbContext db, IEmailService emailService, IWeb
 
             string inviteUrl = $"{frontendUrl}/register?token={Uri.EscapeDataString(token)}";
             string htmlBody = htmlTemplate.Replace("{{InviteUrl}}", inviteUrl);
-            pendingEmails.Add((dto.Emails[i], htmlBody));
+            pendingEmails.Add((uniqueEmails[i], htmlBody));
         }
 
         await _db.SaveChangesAsync();
