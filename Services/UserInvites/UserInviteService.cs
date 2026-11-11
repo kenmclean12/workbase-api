@@ -4,86 +4,16 @@ using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.DTO.UserInvite;
 using newproj.Models.UserInvites;
+using newproj.Services.Emails;
 
 namespace newproj.Services.UserInvites;
 
-// public static class UserInviteService
-// {
-//     public static void MapUserInviteEndpoints(this WebApplication app)
-//     {
-//         RouteGroupBuilder group = app.MapGroup("/user-invites").RequireAuthorization();
-
-//         group.MapGet("/pending", async (AppDbContext db) =>
-//         {
-//             var pendingInvites = await db.UserInvites
-//                 .Where(ui => ui.ClientId == null && ui.AcceptedAt == null)
-//                 .Include(ui => ui.InvitedByUser)
-//                 .ToArrayAsync();
-
-//             return Results.Ok(pendingInvites.Select(ui => ui.ToResponse()).ToArray());
-//         });
-
-//         group.MapGet("/client/{clientId:int}/pending", async (AppDbContext db, int clientId) =>
-//         {
-//             var pendingInvites = await db.UserInvites
-//                 .Where(ui => ui.ClientId == clientId && ui.AcceptedAt == null)
-//                 .Include(ui => ui.Client)
-//                 .Include(ui => ui.InvitedByUser)
-//                 .ToArrayAsync();
-
-//             return Results.Ok(pendingInvites.Select(ui => ui.ToResponse()).ToArray());
-//         });
-
-//         group.MapPost("/", async (AppDbContext db, HttpContext context, UserInviteBulkCreateDTO dto) =>
-//         {
-//             if (!int.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out int invitedByUserId)) {
-//                 return Results.Forbid();
-//             }
-
-//             for (int i = 0; i < dto.Emails.Length; i++)
-//             {
-//                 byte[] tokenBytes = RandomNumberGenerator.GetBytes(32);
-//                 string token = Convert.ToBase64String(tokenBytes);
-//                 string tokenHash = Convert.ToBase64String(SHA256.HashData(tokenBytes));
-
-//                 var createDTO = new UserInviteCreateDTO
-//                 {
-//                     Email = dto.Emails[i],
-//                     Role = dto.Role,
-//                     ClientId = dto.ClientId,
-//                     TokenHash = tokenHash,
-//                     InvitedByUserId = invitedByUserId,
-//                 };
-
-//                 var invite = UserInvite.Create(createDTO);
-//                 db.UserInvites.Add(invite);
-//             }
-
-//             await db.SaveChangesAsync();
-//             return Results.NoContent();
-//         })
-//             .RequireAuthorization("AdminOrManager");
-
-//         group.MapDelete("/{id:int}", async (AppDbContext db, int id) =>
-//         {
-//             var invite = await db.UserInvites.FindAsync(id);
-//             if (invite is null)
-//             {
-//                 return Results.NotFound($"No invite was found with the provided id: {id}");
-//             }
-
-//             db.UserInvites.Remove(invite);
-//             await db.SaveChangesAsync();
-
-//             return Results.NoContent();
-//         })
-//             .RequireAuthorization("AdminOrManager");
-//     }
-// }
-
-public class UserInviteService(AppDbContext db) : IUserInviteService
+public class UserInviteService(AppDbContext db, IEmailService emailService, IWebHostEnvironment environment, IConfiguration configuration) : IUserInviteService
 {
     private readonly AppDbContext _db = db;
+    private readonly IEmailService _emailService = emailService;
+    private readonly IWebHostEnvironment _environment = environment;
+    private readonly IConfiguration _configuration = configuration;
 
     public async Task<ICollection<UserInviteResponseDTO>> FindPending()
     {
@@ -108,9 +38,15 @@ public class UserInviteService(AppDbContext db) : IUserInviteService
 
     public async Task<bool> Create(UserInviteBulkCreateDTO dto, int invitedByUserId)
     {
+        string templatePath = Path.Combine(_environment.ContentRootPath, "Templates", "Emails", "UserInvite.html");
+        string htmlTemplate = await File.ReadAllTextAsync(templatePath);
+        string frontendUrl = _configuration["Frontend:URL"] ?? throw new InvalidOperationException("Frontend:URL is not configured");
+
+        List<(string email, string body)> pendingEmails = new();
         for (int i = 0; i < dto.Emails.Length; i++)
         {
             byte[] tokenBytes = RandomNumberGenerator.GetBytes(32);
+            string token = Convert.ToBase64String(tokenBytes);
             string tokenHash = Convert.ToBase64String(SHA256.HashData(tokenBytes));
 
             var createDTO = new UserInviteCreateDTO
@@ -124,9 +60,19 @@ public class UserInviteService(AppDbContext db) : IUserInviteService
 
             var invite = UserInvite.Create(createDTO);
             _db.UserInvites.Add(invite);
+
+            string inviteUrl = $"{frontendUrl}/register?token={Uri.EscapeDataString(token)}";
+            string htmlBody = htmlTemplate.Replace("{{InviteUrl}}", inviteUrl);
+            pendingEmails.Add((dto.Emails[i], htmlBody));
         }
 
         await _db.SaveChangesAsync();
+
+        foreach (var (email, body) in pendingEmails)
+        {
+            await _emailService.SendAsync(email, "Workbase Invite", body);
+        }
+
         return true;
     }
 
