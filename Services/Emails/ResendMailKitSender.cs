@@ -1,4 +1,3 @@
-
 using FluentEmail.Core;
 using FluentEmail.Core.Interfaces;
 using FluentEmail.Core.Models;
@@ -65,8 +64,6 @@ public class ResendMailKitSender(
 
             using var client = new SmtpClient();
 
-            // Disable revocation checking only in Development.
-            // TLS certificate and hostname validation remain enabled.
             client.CheckCertificateRevocation = !environment.IsDevelopment();
 
             await client.ConnectAsync(
