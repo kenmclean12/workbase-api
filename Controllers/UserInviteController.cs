@@ -29,7 +29,8 @@ public class UserInviteController(IUserInviteService userInviteService) : Contro
     [Authorize(Policy = "AdminOrManager")]
     public async Task<IActionResult> Create(UserInviteBulkCreateDTO dto)
     {
-        if (!int.TryParse(ClaimTypes.NameIdentifier, out int invitedByUserId))
+        string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!int.TryParse(userId, out int invitedByUserId))
         {
             return Forbid("No user id provided in access token");
         }
