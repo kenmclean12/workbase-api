@@ -15,9 +15,7 @@ using newproj.Services.Clients;
 using newproj.Services.RequestNotes;
 using newproj.Services.Requests;
 using newproj.Services.UserInvites;
-using FluentEmail.MailKitSmtp;
 using newproj.Services.Emails;
-using MailKit.Security;
 using FluentEmail.Core.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -115,13 +113,6 @@ builder.Services.AddScoped<IRequestHistoryService, RequestHistoryService>();
 
 var app = builder.Build();
 app.UseCors("AllowLocalHost");
-
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
-    SeedData.Initialize(db);
-}
 
 if (app.Environment.IsDevelopment())
 {
