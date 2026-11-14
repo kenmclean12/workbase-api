@@ -45,12 +45,12 @@ public class RequestController(IRequestService requestService) : ControllerBase
     {
         if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int createdByUserId))
         {
-            return Forbid("No user id provided in token");
+            return StatusCode(StatusCodes.Status403Forbidden, "No user id provided in token");
         }
 
         if (!int.TryParse(User.FindFirstValue("client_id"), out int requestUserClientId) || requestUserClientId != dto.ClientId)
         {
-            return Forbid("Must be a valid client user to create a request");
+            return StatusCode(StatusCodes.Status403Forbidden, "Must be a valid client user to create a request");
         }
 
         RequestCreateResult result = await _requestService.Create(dto, createdByUserId);
@@ -69,7 +69,7 @@ public class RequestController(IRequestService requestService) : ControllerBase
     {
         if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int actionUserId))
         {
-            return Forbid("No user id provided in token");
+            return StatusCode(StatusCodes.Status403Forbidden, "No user id provided in token");
         }
 
         if (

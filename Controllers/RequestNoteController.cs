@@ -52,7 +52,7 @@ public class RequestNoteController(IRequestNoteService requestNoteService) : Con
         return result switch
         {
             RequestNoteMutationResult.NoteNotFound => NotFound($"No request note was found with the provided id: {id}"),
-            RequestNoteMutationResult.UnauthorizedUser => Forbid("You are not authorized to edit this request note"),
+            RequestNoteMutationResult.UnauthorizedUser => StatusCode(StatusCodes.Status403Forbidden, "You are not authorized to edit this request note"),
             RequestNoteMutationResult.Success => NoContent(),
             _ => StatusCode(StatusCodes.Status500InternalServerError)
         };
@@ -71,7 +71,7 @@ public class RequestNoteController(IRequestNoteService requestNoteService) : Con
         return result switch
         {
             RequestNoteMutationResult.NoteNotFound => NotFound($"No request note was found with the provided id: {id}"),
-            RequestNoteMutationResult.UnauthorizedUser => Forbid("You are not authorized to delete this request note"),
+            RequestNoteMutationResult.UnauthorizedUser => StatusCode(StatusCodes.Status403Forbidden, "You are not authorized to delete this request note"),
             RequestNoteMutationResult.Success => NoContent(),
             _ => StatusCode(StatusCodes.Status500InternalServerError)
         };

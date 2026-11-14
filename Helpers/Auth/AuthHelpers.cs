@@ -5,7 +5,7 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using newproj.Models.Users;
 
-namespace newproj.Helpers.Auth;
+namespace newproj.Helpers;
 
 public static class AuthHelpers
 {

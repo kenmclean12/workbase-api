@@ -2,6 +2,8 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using newproj.DTO.User;
+using newproj.Helpers;
+using newproj.Models.Users;
 using newproj.Services.Users;
 
 namespace newproj.Controllers;
@@ -49,13 +51,35 @@ public class UserController(IUserService userService) : ControllerBase
     }
 
     [HttpPatch("{id:int}")]
-    [Authorize(Policy = "AdminOrManager")]
+    [Authorize(Policy = "BlockReadonly")]
     public async Task<IActionResult> Update(UserUpdateDTO dto, int id)
     {
-        UserUpdateResult result = await _userService.Update(dto, id);
+        if (!Enum.TryParse(User.FindFirstValue(ClaimTypes.Role), out UserRole actorRole) || !Enum.IsDefined(actorRole)) {
+            return StatusCode(StatusCodes.Status401Unauthorized, "No role was found from the provided token");
+        }
+
+        bool isAdmin = actorRole >= UserRole.ADMIN;
+        if (!isAdmin && dto.Role is not null)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "Only Admin or SuperAdmin users can change the role of a user");
+        }
+
+        if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int actorId))
+        {
+            return StatusCode(StatusCodes.Status401Unauthorized, "Invalid user identifier in token");
+        }
+
+        if (actorId == id && dto.Role is not null)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, "You cannot edit your own user role");
+        }
+
+        UserUpdateResult result = await _userService.Update(dto, actorId, actorRole, id);
         return result switch
         {
             UserUpdateResult.UserNotFound => NotFound($"No user was found with the provided id: {id}"),
+            UserUpdateResult.CannotManageRole => StatusCode(StatusCodes.Status403Forbidden, "You are not allowed to make changes to a user with a higher role than yourself"),
+            UserUpdateResult.CannotAssignRole => StatusCode(StatusCodes.Status403Forbidden, "You are not permitted to assign this role, based on the role of your user"),
             UserUpdateResult.DuplicateEmail => Conflict($"User already exists with the provided email: {dto.Email}"),
             UserUpdateResult.Success => NoContent(),
             _ => StatusCode(StatusCodes.Status500InternalServerError)
@@ -76,7 +100,7 @@ public class UserController(IUserService userService) : ControllerBase
     {
         if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int id))
         {
-            return Forbid("You are not authorized to perform this action");
+            return StatusCode(StatusCodes.Status403Forbidden, "You are not authorized to perform this action");
         }
 
         ResetPasswordResult result = await _userService.ResetPassword(dto, id);

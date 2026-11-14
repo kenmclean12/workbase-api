@@ -32,7 +32,7 @@ public class UserInviteController(IUserInviteService userInviteService) : Contro
         string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(userId, out int invitedByUserId))
         {
-            return Forbid("No user id provided in access token");
+            return StatusCode(StatusCodes.Status403Forbidden, "No user id provided in access token");
         }
 
         bool created = await _userInviteService.Create(dto, invitedByUserId);

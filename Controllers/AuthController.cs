@@ -39,7 +39,7 @@ public class AuthController(IAuthService authService) : ControllerBase
         {
             return result.Failure switch
             {
-                RegisterFailure.InvalidToken => Forbid("Failed to convert invite token to byte array"),
+                RegisterFailure.InvalidToken => StatusCode(StatusCodes.Status403Forbidden, "Failed to convert invite token to byte array"),
                 RegisterFailure.InviteNotFound => NotFound($"No invite was found for the provided email: {dto.Email}"),
                 _ => StatusCode(StatusCodes.Status500InternalServerError)
             };
@@ -57,7 +57,7 @@ public class AuthController(IAuthService authService) : ControllerBase
         {
             return result.Failure switch
             {
-                RefreshAccessTokenFailure.InvalidToken => Forbid("Failed to convert refresh token to byte array"),
+                RefreshAccessTokenFailure.InvalidToken => StatusCode(StatusCodes.Status403Forbidden, "Failed to convert refresh token to byte array"),
                 RefreshAccessTokenFailure.RefreshTokenNotFound => NotFound("Refresh token not found with the provided token string"),
                 RefreshAccessTokenFailure.UserNotFound => NotFound($"No user was found with the id provided by the matched refresh token"),
                 _ => StatusCode(StatusCodes.Status500InternalServerError)
@@ -74,7 +74,7 @@ public class AuthController(IAuthService authService) : ControllerBase
         LogoutResult result = await _authService.Logout(dto);
         return result switch
         {
-            LogoutResult.InvalidToken => Forbid("Failed to convert refresh token to byte array"),
+            LogoutResult.InvalidToken => StatusCode(StatusCodes.Status403Forbidden, "Failed to convert refresh token to byte array"),
             LogoutResult.RefreshTokenNotFound => NotFound("No refresh token entry was found matching the provided token string"),
             LogoutResult.Success => NoContent(),
             _ => StatusCode(StatusCodes.Status500InternalServerError)

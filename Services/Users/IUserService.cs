@@ -1,4 +1,5 @@
 using newproj.DTO.User;
+using newproj.Models.Users;
 
 namespace newproj.Services.Users;
 
@@ -14,7 +15,7 @@ public interface IUserService
 
     Task<UserResponseDTO?> Create(UserCreateDTO dto);
 
-    Task<UserUpdateResult> Update(UserUpdateDTO dto, int id);
+    Task<UserUpdateResult> Update(UserUpdateDTO dto, int actorId, UserRole actorRole, int id);
 
     Task<bool> Delete(int id);
 

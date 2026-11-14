@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using newproj.Data;
 using newproj.DTO.Auth;
 using newproj.DTO.User;
-using newproj.Helpers.Auth;
+using newproj.Helpers;
 using newproj.Models.Auth;
 using newproj.Models.UserInvites;
 using newproj.Models.Users;
